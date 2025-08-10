@@ -1,0 +1,10 @@
+# Python
+backend/venv/
+backend/.env
+*.pyc
+__pycache__/
+
+# Node.js
+frontend/node_modules/
+frontend/.next/
+frontend/.env.local
