@@ -1,0 +1,17 @@
+fastapi==0.116.1
+uvicorn[standard]
+python-dotenv
+pymongo
+celery
+redis
+pydantic-settings
+pydantic
+passlib==1.7.4
+bcrypt==3.2.0
+python-jose
+python-multipart
+email-validator
+sqlmodel
+requests
+certifi==2025.8.3
+certifi

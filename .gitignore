@@ -4,6 +4,9 @@ backend/.env
 *.pyc
 __pycache__/
 
+# uploads
+backend/uploads/
+
 # Node.js
 frontend/node_modules/
 frontend/.next/
