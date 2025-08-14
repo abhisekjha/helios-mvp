@@ -1,11 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState, useCallback } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/context/AuthContext';
 import { getGoal, Goal } from '@/api/goals';
-import { getPlans, Plan } from '@/api/plans';
 import { uploadData, getDataUploads } from '@/api/data_uploads';
 import { DataUpload } from '@/types/data-upload';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,15 +21,13 @@ import {
 
 export default function GoalDetailPage() {
   const { goalId } = useParams();
-  const router = useRouter();
   const { user } = useAuth();
   const [goal, setGoal] = useState<Goal | null>(null);
   const [uploads, setUploads] = useState<DataUpload[]>([]);
-  const [plans, setPlans] = useState<Plan[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const fetchGoal = async () => {
+  const fetchGoal = useCallback(async () => {
     if (typeof goalId === 'string') {
       try {
         const goalData = await getGoal(goalId);
@@ -39,9 +36,9 @@ export default function GoalDetailPage() {
         console.error('Failed to fetch goal', error);
       }
     }
-  };
+  }, [goalId]);
 
-  const fetchUploads = async () => {
+  const fetchUploads = useCallback(async () => {
     if (typeof goalId === 'string') {
       try {
         const uploadsData = await getDataUploads(goalId);
@@ -50,24 +47,13 @@ export default function GoalDetailPage() {
         console.error('Failed to fetch uploads', error);
       }
     }
-  };
-
-  const fetchPlans = async () => {
-    if (typeof goalId === 'string') {
-      try {
-        const plansData = await getPlans(goalId);
-        setPlans(plansData);
-      } catch (error) {
-        console.error('Failed to fetch plans', error);
-      }
-    }
-  };
+  }, [goalId]);
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        await Promise.all([fetchGoal(), fetchUploads(), fetchPlans()]);
+        await Promise.all([fetchGoal(), fetchUploads()]);
       } catch (error) {
         console.error('Failed to fetch initial data', error);
       } finally {
@@ -79,12 +65,11 @@ export default function GoalDetailPage() {
 
     const interval = setInterval(() => {
       fetchUploads();
-      fetchPlans();
       fetchGoal();
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [goalId]);
+  }, [goalId, fetchGoal, fetchUploads]);
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setFile(event.target.files[0]);

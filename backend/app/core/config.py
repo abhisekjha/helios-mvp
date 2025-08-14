@@ -1,5 +1,5 @@
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Union
 
 class Settings(BaseSettings):
     SECRET_KEY: str
@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     MONGODB_DB_NAME: str
     REDIS_URL: str
     LLM_API_KEY: str
-    BACKEND_CORS_ORIGINS: List[str] = ["http://localhost:3000"]
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = ["http://localhost:3000"]
 
     model_config = {
         "env_file": ".env",

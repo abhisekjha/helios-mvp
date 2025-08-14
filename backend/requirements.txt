@@ -14,4 +14,5 @@ email-validator
 sqlmodel
 requests
 certifi==2025.8.3
-certifi
+openai>=1.0.0
+pandas>=2.0.0

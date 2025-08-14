@@ -14,7 +14,6 @@ import {
   FormMessage,
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { getGoal, updateGoal } from '@/api/goals';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar } from '@/components/ui/calendar';
@@ -29,13 +28,13 @@ import { format } from 'date-fns';
 import { useEffect } from 'react';
 
 const formSchema = z.object({
-  title: z.string().min(2, {
-    message: 'Title must be at least 2 characters.',
+  objective_text: z.string().min(2, {
+    message: 'Objective must be at least 2 characters.',
   }),
-  description: z.string().min(10, {
-    message: 'Description must be at least 10 characters.',
+  budget: z.number().min(0, {
+    message: 'Budget must be a positive number.',
   }),
-  due_date: z.date(),
+  end_date: z.date(),
   status: z.string().min(2, {
     message: 'Status must be at least 2 characters.',
   }),
@@ -44,20 +43,20 @@ const formSchema = z.object({
 export default function EditGoalPage() {
   const router = useRouter();
   const params = useParams();
-  const goalId = Number(params.goalId);
+  const goalId = params.goalId as string;
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
   });
 
   useEffect(() => {
-    if (goalId) {
+    if (goalId && typeof goalId === 'string') {
       const fetchGoal = async () => {
         try {
           const goal = await getGoal(goalId);
           form.reset({
             ...goal,
-            due_date: new Date(goal.due_date),
+            end_date: new Date(goal.end_date),
           });
         } catch (error) {
           console.error('Failed to fetch goal:', error);
@@ -72,7 +71,7 @@ export default function EditGoalPage() {
     try {
       await updateGoal(goalId, {
         ...values,
-        due_date: values.due_date.toISOString(),
+        end_date: values.end_date.toISOString(),
       });
       router.push('/goals');
     } catch (error) {
@@ -92,12 +91,12 @@ export default function EditGoalPage() {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
               <FormField
                 control={form.control}
-                name="title"
+                name="objective_text"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Title</FormLabel>
+                    <FormLabel>Objective</FormLabel>
                     <FormControl>
-                      <Input placeholder="Goal title" {...field} />
+                      <Input placeholder="Goal objective" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -105,15 +104,16 @@ export default function EditGoalPage() {
               />
               <FormField
                 control={form.control}
-                name="description"
+                name="budget"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Description</FormLabel>
+                    <FormLabel>Budget</FormLabel>
                     <FormControl>
-                      <Textarea
-                        placeholder="Tell us a little bit about the goal"
-                        className="resize-none"
+                      <Input 
+                        type="number"
+                        placeholder="Budget amount" 
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -122,10 +122,10 @@ export default function EditGoalPage() {
               />
               <FormField
                 control={form.control}
-                name="due_date"
+                name="end_date"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Due Date</FormLabel>
+                    <FormLabel>End Date</FormLabel>
                     <Popover>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -137,7 +137,7 @@ export default function EditGoalPage() {
                             )}
                           >
                             {field.value ? (
-                              format(field.value, 'PPP')
+                              format(field.value as Date, 'PPP')
                             ) : (
                               <span>Pick a date</span>
                             )}
@@ -148,7 +148,7 @@ export default function EditGoalPage() {
                       <PopoverContent className="w-auto p-0" align="start">
                         <Calendar
                           mode="single"
-                          selected={field.value}
+                          selected={field.value as Date}
                           onSelect={field.onChange}
                           disabled={(date) =>
                             date < new Date() || date < new Date('1900-01-01')

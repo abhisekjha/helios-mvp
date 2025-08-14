@@ -6,6 +6,7 @@ import {
   useState,
   useEffect,
   ReactNode,
+  useCallback,
 } from 'react';
 import { login as apiLogin } from '@/api/auth';
 import { useRouter } from 'next/navigation';
@@ -42,6 +43,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
+  const logout = useCallback(() => {
+    setUser(null);
+    setToken(null);
+    localStorage.removeItem('token');
+    router.push('/login');
+  }, [router]);
+
   useEffect(() => {
     const storedToken = localStorage.getItem('token');
     if (storedToken) {
@@ -68,20 +76,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
     fetchUser();
-  }, [token, router]);
+  }, [token, logout]);
 
   const login = async (formData: FormData) => {
     const { access_token } = await apiLogin(formData);
     setToken(access_token);
     localStorage.setItem('token', access_token);
     router.push('/');
-  };
-
-  const logout = () => {
-    setUser(null);
-    setToken(null);
-    localStorage.removeItem('token');
-    router.push('/login');
   };
 
   const value = { user, token, login, logout, isLoading };
