@@ -39,15 +39,14 @@ async def upload_data(
     with open(file_path, "wb") as buffer:
         buffer.write(file.file.read())
 
-    data_upload = DataUpload(
+    data_upload = crud_data_upload.create_data_upload(
+        db=db,
         goal_id=goal_id,
         uploader_id=str(current_user.id),
-        file_name=file.filename,
         file_path=file_path,
-        upload_timestamp=datetime.utcnow(),
-        status=Status.PENDING,
+        file_name=file.filename,
     )
-    created_upload = crud_data_upload.create_data_upload(db=db, data_upload=data_upload)
+    created_upload = data_upload
 
     validate_csv_file.delay(str(created_upload.id))
 

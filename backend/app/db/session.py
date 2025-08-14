@@ -9,7 +9,7 @@ def get_db(request: Request) -> Database:
 
 def get_database() -> Database:
     try:
-        client = pymongo.MongoClient(settings.DATABASE_URL, tlsCAFile=certifi.where())
+        client = pymongo.MongoClient(settings.DATABASE_URL)
         db = client[settings.MONGODB_DB_NAME]
         return db
     except Exception as e:
