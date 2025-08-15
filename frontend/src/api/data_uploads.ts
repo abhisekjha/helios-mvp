@@ -21,3 +21,7 @@ export const getInsights = async (uploadId: string): Promise<string[]> => {
 export const generateInsight = async (dataUploadId: string): Promise<void> => {
     await axios.post(`/api/v1/data_uploads/${dataUploadId}/generate_insight`);
 }
+
+export const deleteDataUpload = async (goalId: string, dataUploadId: string): Promise<void> => {
+    await axios.delete(`/api/v1/goals/${goalId}/uploads/${dataUploadId}`);
+}

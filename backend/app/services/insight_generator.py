@@ -9,6 +9,7 @@ from bson import ObjectId
 from app.core.config import settings
 from app.crud import crud_data_upload
 from app.models.data_upload import DataUpload
+from app.services.vector_embeddings import get_embedding_service
 
 
 class InsightGenerator:
@@ -46,6 +47,22 @@ class InsightGenerator:
         
         # Generate insights using AI
         insights_data = self._generate_ai_insights(data_summary, data_upload.goal_id)
+        
+        # **NEW: Create Knowledge Base from the CSV data**
+        try:
+            embedding_service = get_embedding_service(self.db)
+            
+            # Create text chunks from the CSV data
+            chunks = embedding_service.chunk_csv_data(df, data_upload.goal_id)
+            
+            # Store chunks and embeddings in the knowledge base
+            chunk_ids = embedding_service.store_knowledge_base(data_upload.goal_id, chunks)
+            
+            print(f"✅ Created knowledge base with {len(chunk_ids)} chunks for goal {data_upload.goal_id}")
+            
+        except Exception as e:
+            print(f"⚠️  Warning: Failed to create knowledge base: {str(e)}")
+            # Don't fail the entire process if knowledge base creation fails
         
         # Store insights in database
         insight_ids = []

@@ -19,7 +19,7 @@ celery_app = Celery(
 def validate_csv_file(upload_id: str):
     """Validate uploaded CSV file and trigger insight generation if valid."""
     client = MongoClient(settings.DATABASE_URL)
-    db = client.get_default_database()
+    db = client[settings.MONGODB_DB_NAME]
     data_upload = None
     
     try:
@@ -60,7 +60,7 @@ def validate_csv_file(upload_id: str):
 def generate_insights_from_upload(upload_id: str):
     """Generate AI insights from uploaded data."""
     client = MongoClient(settings.DATABASE_URL)
-    db = client.get_default_database()
+    db = client[settings.MONGODB_DB_NAME]
     
     try:
         from app.services.insight_generator import InsightGenerator
@@ -84,7 +84,7 @@ def generate_insights_from_upload(upload_id: str):
 def generate_plans_for_goal(goal_id: str, insight_ids: list = None):
     """Generate strategic plans for a goal based on insights."""
     client = MongoClient(settings.DATABASE_URL)
-    db = client.get_default_database()
+    db = client[settings.MONGODB_DB_NAME]
     goal = None
     
     try:

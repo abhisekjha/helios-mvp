@@ -16,3 +16,14 @@ requests
 certifi==2025.8.3
 openai>=1.0.0
 pandas>=2.0.0
+
+# Sprint S6: Knowledge Base & Conversational UI Dependencies
+sentence-transformers==2.2.2
+faiss-cpu==1.7.4
+sse-starlette==1.6.5
+
+# Future Sprint Dependencies (S8-S10)
+# pytesseract==0.3.10  # For OCR in Sprint S8
+# Pillow==10.0.1       # For image processing in Sprint S8
+# spacy==3.7.2         # For advanced NLP
+# nltk==3.8.1          # For text processing
