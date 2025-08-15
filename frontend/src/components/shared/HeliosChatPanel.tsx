@@ -18,6 +18,14 @@ interface Message {
     type: string;
     similarity_score: number;
   }>;
+  agentActivity?: {
+    currentAgent: string;
+    step: string;
+    progress: number;
+    queryType?: string;
+    confidence?: number;
+    isComplete: boolean;
+  };
 }
 
 interface HeliosChatPanelProps {
@@ -168,13 +176,22 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
       const agentMessageId = (Date.now() + 1).toString();
       let agentContent = "";
       let sources: Array<{ text: string; type: string; similarity_score: number }> = [];
+      let agentActivity = {
+        currentAgent: "Router",
+        step: "Analyzing query...",
+        progress: 0,
+        queryType: "",
+        confidence: 0,
+        isComplete: false
+      };
 
       const agentMessage: Message = {
         id: agentMessageId,
         type: "agent",
         content: "",
         timestamp: new Date(),
-        sources: []
+        sources: [],
+        agentActivity
       };
 
       setMessages(prev => [...prev, agentMessage]);
@@ -213,26 +230,131 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
         for (const line of lines) {
           if (line.startsWith('data: ')) {
             try {
-              const data = JSON.parse(line.slice(6));
+              const jsonData = line.slice(6);
+              if (jsonData.trim() === '[DONE]') break;
+              
+              const data = JSON.parse(jsonData);
               
               if (data.type === 'sources') {
                 sources = data.sources;
-              } else if (data.type === 'content') {
-                agentContent += data.content;
+              } else if (data.type === 'content' || data.type === 'chunk') {
+                // Handle both 'content' and 'chunk' types
+                const contentData = data.content || '';
+                agentContent += contentData;
+                
+                // Parse agent activity from content
+                const content = contentData;
+                
+                // Update agent activity based on content patterns
+                if (content.includes('🧠 Analyzing your question')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Router Agent",
+                    step: "Analyzing query classification",
+                    progress: 15
+                  };
+                } else if (content.includes('Query classified as:')) {
+                  const queryTypeMatch = content.match(/QueryType\.(\w+)/);
+                  const confidenceMatch = content.match(/(\d+)%/);
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Router Agent", 
+                    step: "Query classification complete",
+                    progress: 30,
+                    queryType: queryTypeMatch ? queryTypeMatch[1] : "",
+                    confidence: confidenceMatch ? parseInt(confidenceMatch[1]) : 0
+                  };
+                } else if (content.includes('Planning') && content.includes('processing steps')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Router Agent",
+                    step: "Creating execution plan",
+                    progress: 45
+                  };
+                } else if (content.includes('Step 1: Search for relevant information')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Retrieval Agent",
+                    step: "Searching knowledge base",
+                    progress: 60
+                  };
+                } else if (content.includes('Retrieved') && content.includes('relevant data points')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Retrieval Agent",
+                    step: "Data retrieval complete",
+                    progress: 75
+                  };
+                } else if (content.includes('Step 2: Generate comprehensive response')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Synthesizer Agent",
+                    step: "Generating insights",
+                    progress: 85
+                  };
+                } else if (content.includes('Synthesizing comprehensive response')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Synthesizer Agent",
+                    step: "Creating strategic recommendations", 
+                    progress: 95
+                  };
+                } else if (content.includes('Processing completed')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Complete",
+                    step: "Analysis finished",
+                    progress: 100,
+                    isComplete: true
+                  };
+                }
                 
                 // Update the message in real-time
                 setMessages(prev => prev.map(msg => 
                   msg.id === agentMessageId 
-                    ? { ...msg, content: agentContent, sources }
+                    ? { ...msg, content: agentContent, sources, agentActivity }
                     : msg
                 ));
               } else if (data.type === 'complete') {
+                // Mark as complete
+                agentActivity = {
+                  ...agentActivity,
+                  currentAgent: "Complete",
+                  step: "Analysis finished",
+                  progress: 100,
+                  isComplete: true
+                };
+                setMessages(prev => prev.map(msg => 
+                  msg.id === agentMessageId 
+                    ? { ...msg, content: agentContent, sources, agentActivity }
+                    : msg
+                ));
                 break;
               } else if (data.type === 'error') {
                 throw new Error(data.error);
               }
-            } catch {
-              // Skip invalid JSON lines
+            } catch (parseError) {
+              // Handle non-JSON data (legacy format)
+              const rawData = line.slice(6);
+              if (rawData && rawData !== '[DONE]') {
+                agentContent += rawData;
+                
+                // Try to parse agent activity from raw content
+                if (rawData.includes('🧠 Analyzing your question')) {
+                  agentActivity = {
+                    ...agentActivity,
+                    currentAgent: "Router Agent",
+                    step: "Analyzing query classification",
+                    progress: 15
+                  };
+                }
+                // Update message with raw content
+                setMessages(prev => prev.map(msg => 
+                  msg.id === agentMessageId 
+                    ? { ...msg, content: agentContent, sources, agentActivity }
+                    : msg
+                ));
+              }
             }
           }
         }
@@ -327,6 +449,104 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                   }`}>
                     <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   </div>
+                  
+                  {/* Agent Activity Indicator - Show for agent messages with activity, whether complete or not */}
+                  {message.type === "agent" && (message.agentActivity || message.content.includes('🧠') || message.content.includes('Query classified')) && (
+                    <div className="mt-3">
+                      {/* Debug info - remove this later */}
+                      <div className="text-xs text-gray-500 mb-2 font-mono">
+                        Debug: Agent={message.agentActivity?.currentAgent || 'Unknown'}, Progress={message.agentActivity?.progress || 0}%, Complete={message.agentActivity?.isComplete ? 'true' : 'false'}
+                      </div>
+                      
+                      <Card className={`${
+                        message.agentActivity?.isComplete 
+                          ? "bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200"
+                          : "bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200"
+                      }`}>
+                        <CardContent className="p-4">
+                          <div className="space-y-3">
+                            {/* Agent Status Header */}
+                            <div className="flex items-center justify-between">
+                              <div className="flex items-center space-x-2">
+                                <div className={`w-2 h-2 rounded-full ${
+                                  message.agentActivity?.isComplete ? 'bg-green-500' : 'bg-blue-500 animate-pulse'
+                                }`} />
+                                <span className={`text-sm font-medium ${
+                                  message.agentActivity?.isComplete ? 'text-green-700' : 'text-blue-700'
+                                }`}>
+                                  {message.agentActivity?.currentAgent || 'Agent'}
+                                </span>
+                                {message.agentActivity?.queryType && (
+                                  <Badge variant="outline" className={`text-xs ${
+                                    message.agentActivity?.isComplete 
+                                      ? 'bg-green-100 text-green-700 border-green-300'
+                                      : 'bg-blue-100 text-blue-700 border-blue-300'
+                                  }`}>
+                                    {message.agentActivity.queryType}
+                                  </Badge>
+                                )}
+                              </div>
+                              {message.agentActivity?.confidence && message.agentActivity.confidence > 0 && (
+                                <span className={`text-xs ${
+                                  message.agentActivity?.isComplete ? 'text-green-600' : 'text-blue-600'
+                                }`}>
+                                  {message.agentActivity.confidence}% confidence
+                                </span>
+                              )}
+                            </div>
+                            
+                            {/* Progress Bar - Show unless complete */}
+                            {!message.agentActivity?.isComplete && (
+                              <div className="space-y-2">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-sm text-blue-700">
+                                    {message.agentActivity?.step || 'Processing...'}
+                                  </span>
+                                  <span className="text-xs text-blue-600">
+                                    {message.agentActivity?.progress || 0}%
+                                  </span>
+                                </div>
+                                <div className="w-full bg-blue-100 rounded-full h-2">
+                                  <div 
+                                    className="bg-gradient-to-r from-blue-500 to-indigo-500 h-2 rounded-full transition-all duration-500 ease-out"
+                                    style={{ width: `${message.agentActivity?.progress || 0}%` }}
+                                  />
+                                </div>
+                              </div>
+                            )}
+                            
+                            {/* Agent Steps Visualization */}
+                            <div className="flex items-center justify-between text-xs">
+                              <div className={`flex items-center space-x-1 ${
+                                (message.agentActivity?.progress || 0) >= 30 ? 'text-blue-700' : 'text-gray-400'
+                              }`}>
+                                <div className={`w-3 h-3 rounded-full ${
+                                  (message.agentActivity?.progress || 0) >= 30 ? 'bg-blue-500' : 'bg-gray-300'
+                                }`} />
+                                <span>Router</span>
+                              </div>
+                              <div className={`flex items-center space-x-1 ${
+                                (message.agentActivity?.progress || 0) >= 60 ? 'text-blue-700' : 'text-gray-400'
+                              }`}>
+                                <div className={`w-3 h-3 rounded-full ${
+                                  (message.agentActivity?.progress || 0) >= 60 ? 'bg-blue-500' : 'bg-gray-300'
+                                }`} />
+                                <span>Retrieval</span>
+                              </div>
+                              <div className={`flex items-center space-x-1 ${
+                                (message.agentActivity?.progress || 0) >= 85 ? 'text-blue-700' : 'text-gray-400'
+                              }`}>
+                                <div className={`w-3 h-3 rounded-full ${
+                                  (message.agentActivity?.progress || 0) >= 85 ? 'bg-blue-500' : 'bg-gray-300'
+                                }`} />
+                                <span>Synthesizer</span>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </div>
+                  )}
                   {message.component && (
                     <div className="mt-2">
                       {message.component}
