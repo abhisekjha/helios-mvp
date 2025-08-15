@@ -83,25 +83,25 @@ export default function GoalDetailPage() {
     const statusConfig = {
       'Pending': {
         variant: 'secondary' as const,
-        className: 'bg-yellow-100 text-yellow-800 border-yellow-300',
+        className: 'bg-muted text-muted-foreground border-border',
         icon: '⏳',
         clickable: false
       },
       'Validating': {
-        variant: 'secondary' as const,
-        className: 'bg-blue-100 text-blue-800 border-blue-300',
+        variant: 'default' as const,
+        className: 'bg-primary text-primary-foreground border-primary',
         icon: '🔄',
         clickable: false
       },
       'Failed': {
         variant: 'destructive' as const,
-        className: 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200',
+        className: 'bg-destructive text-destructive-foreground border-destructive',
         icon: '❌',
         clickable: false
       },
       'Complete': {
         variant: 'default' as const,
-        className: 'bg-gradient-to-r from-green-400 to-emerald-500 text-white border-0 hover:from-green-500 hover:to-emerald-600 cursor-pointer transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl',
+        className: 'bg-primary text-primary-foreground border-primary hover:bg-brand-primary-hover cursor-pointer transition-colors',
         icon: '✅',
         clickable: true
       }
@@ -166,39 +166,39 @@ export default function GoalDetailPage() {
 
   return (
     <ToastProvider>
-      <div className="container mx-auto p-4 space-y-6">
-      <Card className="shadow-lg border-0 bg-gradient-to-r from-indigo-500 to-purple-600 text-white">
+      <div className="container mx-auto p-8 space-y-8">
+      <Card className="border-border bg-card">
         <CardHeader>
-          <CardTitle className="text-2xl flex items-center space-x-3">
+          <CardTitle className="text-2xl font-semibold flex items-center space-x-3 text-foreground">
             <span className="text-3xl">🎯</span>
             <div>
               <div>{goal.objective_text}</div>
-              <div className="text-indigo-100 text-sm font-normal mt-1">
+              <div className="text-muted-foreground text-sm font-normal mt-1">
                 Goal Management Dashboard
               </div>
             </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-indigo-100">
-            <div>
-              <div className="text-xs opacity-75">Budget</div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 text-foreground">
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">Budget</div>
               <div className="text-lg font-semibold">${goal.budget?.toLocaleString()}</div>
             </div>
-            <div>
-              <div className="text-xs opacity-75">Start Date</div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">Start Date</div>
               <div className="text-lg font-semibold">
                 {new Date(goal.start_date).toLocaleDateString()}
               </div>
             </div>
-            <div>
-              <div className="text-xs opacity-75">End Date</div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">End Date</div>
               <div className="text-lg font-semibold">
                 {new Date(goal.end_date).toLocaleDateString()}
               </div>
             </div>
-            <div>
-              <div className="text-xs opacity-75">Status</div>
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground uppercase tracking-wide">Status</div>
               <div className="text-lg font-semibold flex items-center space-x-2">
                 <span>{goal.status === 'Draft' ? '📝' : goal.status === 'AWAITING_REVIEW' ? '🔍' : '✅'}</span>
                 <span>{goal.status}</span>
@@ -206,9 +206,9 @@ export default function GoalDetailPage() {
             </div>
           </div>
           {goal.status === 'AWAITING_REVIEW' && (
-            <div className="mt-6">
+            <div className="mt-8">
               <Link href={`/goals/${goalId}/review`} legacyBehavior>
-                <Button className="bg-white text-indigo-600 hover:bg-gray-100 font-semibold">
+                <Button variant="accent" className="font-semibold">
                   <span className="mr-2">📋</span>
                   Review Plans
                 </Button>
@@ -218,34 +218,34 @@ export default function GoalDetailPage() {
         </CardContent>
       </Card>
       {goal.status === 'Processing' && (
-        <Card className="border-blue-200 bg-gradient-to-r from-blue-50 to-cyan-50">
+        <Card className="border-border bg-muted/30">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-blue-800">
+            <CardTitle className="flex items-center space-x-2 text-foreground">
               <span className="animate-spin text-2xl">⚙️</span>
               <span>Processing Goal</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-blue-700">The goal is currently being processed. This may take a few minutes...</p>
-            <div className="mt-3 flex items-center space-x-2">
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"></div>
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-              <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            <p className="text-muted-foreground">The goal is currently being processed. This may take a few minutes...</p>
+            <div className="mt-4 flex items-center space-x-2">
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
             </div>
           </CardContent>
         </Card>
       )}
       {goal.status === 'Failed' && (
-        <Card className="border-red-200 bg-gradient-to-r from-red-50 to-pink-50">
+        <Card className="border-destructive bg-destructive/5">
           <CardHeader>
-            <CardTitle className="flex items-center space-x-2 text-red-800">
+            <CardTitle className="flex items-center space-x-2 text-destructive">
               <span className="text-2xl">❌</span>
               <span>Goal Processing Failed</span>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-red-700 mb-4">There was an error processing the goal. Please try again.</p>
-            <Button className="bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white">
+            <p className="text-muted-foreground mb-6">There was an error processing the goal. Please try again.</p>
+            <Button variant="destructive">
               <span className="mr-2">🔄</span>
               Retry Processing
             </Button>
@@ -259,13 +259,13 @@ export default function GoalDetailPage() {
           </CardHeader>
           <CardContent>
             {(user?.role === 'manager' || user?.role === 'director') && goal.status === 'Draft' && (
-              <div className="mb-6">
-                <h3 className="text-lg font-semibold mb-4 flex items-center">
+              <div className="mb-8">
+                <h3 className="text-lg font-semibold mb-4 flex items-center text-foreground">
                   <span className="mr-2">📤</span>
                   Upload Data File
                 </h3>
-                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-4 rounded-lg border border-blue-200">
-                  <div className="flex items-center space-x-3">
+                <div className="bg-muted/50 p-6 rounded-lg border border-border">
+                  <div className="flex items-center space-x-4">
                     <Input
                       type="file"
                       onChange={handleFileChange}
@@ -275,13 +275,12 @@ export default function GoalDetailPage() {
                     <Button 
                       onClick={handleUpload} 
                       disabled={!file}
-                      className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
                     >
                       <span className="mr-1">✨</span>
                       Upload
                     </Button>
                   </div>
-                  <p className="text-xs text-gray-600 mt-2">
+                  <p className="text-xs text-muted-foreground mt-3">
                     📝 Supported format: CSV files only. Data will be processed automatically after upload.
                   </p>
                 </div>
@@ -289,10 +288,10 @@ export default function GoalDetailPage() {
             )}
 
             <div>
-              <h3 className="text-lg font-semibold mb-2">Uploaded Files</h3>
+              <h3 className="text-lg font-semibold mb-4 text-foreground">Uploaded Files</h3>
               {uploads.length > 0 && (
-                <div className="mb-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4 text-sm text-gray-600">
+                <div className="mb-6 flex items-center justify-between">
+                  <div className="flex items-center space-x-6 text-sm text-muted-foreground">
                     <span>📊 Total Files: {uploads.length}</span>
                     <span>✅ Complete: {uploads.filter(u => u.status === 'Complete').length}</span>
                     <span>🧠 With Insights: {uploads.filter(u => u.insights).length}</span>
@@ -313,7 +312,7 @@ export default function GoalDetailPage() {
                         }}
                         variant="outline"
                         size="sm"
-                        className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                        className="text-destructive border-destructive hover:bg-destructive/10"
                       >
                         <span className="mr-1">🗑️</span>
                         Delete All
@@ -323,7 +322,6 @@ export default function GoalDetailPage() {
                       onClick={navigateToInsights}
                       variant="outline"
                       size="sm"
-                      className="bg-gradient-to-r from-blue-500 to-purple-500 text-white border-0 hover:from-blue-600 hover:to-purple-600"
                     >
                       <span className="mr-1">📊</span>
                       View All Insights
@@ -333,12 +331,12 @@ export default function GoalDetailPage() {
               )}
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50">
-                    <TableHead className="font-semibold">File Name</TableHead>
-                    <TableHead className="font-semibold">Upload Time</TableHead>
-                    <TableHead className="font-semibold">Status</TableHead>
-                    <TableHead className="font-semibold">Insights</TableHead>
-                    <TableHead className="font-semibold">Actions</TableHead>
+                  <TableRow>
+                    <TableHead>File Name</TableHead>
+                    <TableHead>Upload Time</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Insights</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -347,12 +345,12 @@ export default function GoalDetailPage() {
                     .map((upload, index) => {
                       const statusConfig = getStatusBadge(upload.status);
                       return (
-                        <TableRow key={upload._id || index} className="hover:bg-gray-50">
+                        <TableRow key={upload._id || index}>
                           <TableCell className="font-medium flex items-center space-x-2">
                             <span className="text-lg">📄</span>
                             <span>{upload.file_name}</span>
                           </TableCell>
-                          <TableCell className="text-gray-600">
+                          <TableCell className="text-muted-foreground">
                             {new Date(upload.upload_timestamp).toLocaleString()}
                           </TableCell>
                           <TableCell>
@@ -371,18 +369,18 @@ export default function GoalDetailPage() {
                           <TableCell>
                             {upload.insights ? (
                               <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                <span className="text-sm text-green-700 font-medium">Available</span>
+                                <div className="w-2 h-2 bg-primary rounded-full"></div>
+                                <span className="text-sm text-foreground font-medium">Available</span>
                               </div>
                             ) : upload.status === 'Complete' ? (
                               <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
-                                <span className="text-sm text-orange-700">Ready to Generate</span>
+                                <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
+                                <span className="text-sm text-muted-foreground">Ready to Generate</span>
                               </div>
                             ) : (
                               <div className="flex items-center space-x-2">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
-                                <span className="text-sm text-gray-500">Not Ready</span>
+                                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+                                <span className="text-sm text-muted-foreground">Not Ready</span>
                               </div>
                             )}
                           </TableCell>
@@ -392,7 +390,7 @@ export default function GoalDetailPage() {
                                 <Button
                                   onClick={() => handleStatusClick(upload)}
                                   size="sm"
-                                  className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                  className=""
                                 >
                                   <span className="mr-1">🔍</span>
                                   View Details
@@ -402,7 +400,7 @@ export default function GoalDetailPage() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="text-red-600 border-red-300 hover:bg-red-50"
+                                  className="text-destructive border-destructive hover:bg-destructive/10"
                                 >
                                   <span className="mr-1">🔄</span>
                                   Retry
@@ -414,7 +412,7 @@ export default function GoalDetailPage() {
                                   onClick={() => handleDeleteUpload(upload._id, upload.file_name)}
                                   size="sm"
                                   variant="outline"
-                                  className="text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                                  className="text-destructive border-destructive hover:bg-destructive/10"
                                 >
                                   <span className="mr-1">�️</span>
                                   Delete
@@ -429,9 +427,9 @@ export default function GoalDetailPage() {
               </Table>
               
               {uploads.length === 0 && (
-                <div className="text-center py-8 text-gray-500">
-                  <div className="text-4xl mb-2">📁</div>
-                  <p className="font-medium">No files uploaded yet</p>
+                <div className="text-center py-12 text-muted-foreground">
+                  <div className="text-4xl mb-3">📁</div>
+                  <p className="font-medium text-foreground">No files uploaded yet</p>
                   <p className="text-sm">Upload CSV files to start generating insights</p>
                 </div>
               )}

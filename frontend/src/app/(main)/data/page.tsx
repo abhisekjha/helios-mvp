@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   Card,
@@ -26,7 +26,7 @@ import { InsightsViewer } from "@/components/insights-viewer";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ToastProvider, toast } from "@/components/toast";
 
-export default function DataPage() {
+function DataPageContent() {
   const [dataUploads, setDataUploads] = useState<DataUpload[]>([]);
   const [loadingInsights, setLoadingInsights] = useState<Record<string, boolean>>({});
   const [expandedInsights, setExpandedInsights] = useState<Record<string, boolean>>({});
@@ -103,12 +103,6 @@ export default function DataPage() {
     );
   };
 
-  const truncateText = (text: string, maxLength: number = 100) => {
-    if (!text) return '';
-    if (text.length <= maxLength) return text;
-    return text.substring(0, maxLength) + '...';
-  };
-
   const toggleInsightsExpansion = (uploadId: string) => {
     setExpandedInsights(prev => ({
       ...prev,
@@ -157,124 +151,184 @@ export default function DataPage() {
 
   return (
     <ToastProvider>
-      <div className="space-y-6">
+      {/* Premium Enterprise Header Section */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-semibold text-ink mb-2">Trade Promotion Data</h1>
+            <p className="text-ink-soft">Manage and analyze your promotional data with AI-powered insights</p>
+          </div>
+          <div className="flex items-center space-x-3">
+            <Badge variant="secondary" className="px-3 py-1 text-sm">
+              Goal: {goalId.slice(-6)}
+            </Badge>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="overview" className="flex items-center space-x-2">
-            <span>📊</span>
-            <span>Overview</span>
+        {/* Clean Professional Tab Navigation */}
+        <TabsList className="grid w-full grid-cols-2 bg-bg-subtle border border-border rounded-lg p-1 h-12">
+          <TabsTrigger 
+            value="overview" 
+            className="flex items-center space-x-2 h-10 rounded-md transition-all duration-200 data-[state=active]:bg-bg data-[state=active]:shadow-sm"
+          >
+            <span className="text-lg">📊</span>
+            <span className="font-medium">Data Overview</span>
           </TabsTrigger>
-          <TabsTrigger value="details" disabled={!selectedUpload} className="flex items-center space-x-2">
-            <span>🔍</span>
-            <span>Detailed Analysis</span>
+          <TabsTrigger 
+            value="details" 
+            disabled={!selectedUpload} 
+            className="flex items-center space-x-2 h-10 rounded-md transition-all duration-200 data-[state=active]:bg-bg data-[state=active]:shadow-sm disabled:opacity-50"
+          >
+            <span className="text-lg">🔍</span>
+            <span className="font-medium">Detailed Analysis</span>
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-6">
-          {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-            <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-blue-700 flex items-center">
-                  <span className="mr-2">📁</span>
+        <TabsContent value="overview" className="space-y-8">
+          {/* Enterprise Summary Cards with Improved Hierarchy */}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            <Card className="bg-bg-subtle border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-ink-soft flex items-center">
+                  <div className="w-8 h-8 rounded-lg bg-brand-primary/10 flex items-center justify-center mr-3">
+                    <span className="text-brand-primary">📁</span>
+                  </div>
                   Total Uploads
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-blue-800">{dataUploads.length}</div>
+                <div className="text-3xl font-semibold text-ink">{dataUploads.length}</div>
+                <p className="text-xs text-ink-soft mt-1">Data files uploaded</p>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-green-700 flex items-center">
-                  <span className="mr-2">✅</span>
+            <Card className="bg-bg-subtle border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-ink-soft flex items-center">
+                  <div className="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center mr-3">
+                    <span className="text-green-600">✅</span>
+                  </div>
                   Complete
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-green-800">
+                <div className="text-3xl font-semibold text-ink">
                   {dataUploads.filter(upload => upload.status === 'Complete').length}
                 </div>
+                <p className="text-xs text-ink-soft mt-1">Successfully processed</p>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-purple-700 flex items-center">
-                  <span className="mr-2">🧠</span>
-                  With Insights
+            <Card className="bg-bg-subtle border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-ink-soft flex items-center">
+                  <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center mr-3">
+                    <span className="text-accent">🧠</span>
+                  </div>
+                  AI Insights
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-purple-800">
+                <div className="text-3xl font-semibold text-ink">
                   {dataUploads.filter(upload => upload.insights).length}
                 </div>
+                <p className="text-xs text-ink-soft mt-1">Files with AI analysis</p>
               </CardContent>
             </Card>
             
-            <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium text-orange-700 flex items-center">
-                  <span className="mr-2">⏳</span>
+            <Card className="bg-bg-subtle border-border shadow-sm hover:shadow-md transition-shadow duration-200">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium text-ink-soft flex items-center">
+                  <div className="w-8 h-8 rounded-lg bg-amber-50 flex items-center justify-center mr-3">
+                    <span className="text-amber-600">⏳</span>
+                  </div>
                   Pending
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="text-3xl font-bold text-orange-800">
+                <div className="text-3xl font-semibold text-ink">
                   {dataUploads.filter(upload => upload.status === 'Pending').length}
                 </div>
+                <p className="text-xs text-ink-soft mt-1">Awaiting processing</p>
               </CardContent>
             </Card>
           </div>
 
-          <Card className="shadow-lg">
-            <CardHeader className="bg-gradient-to-r from-gray-50 to-gray-100">
-              <CardTitle className="flex items-center space-x-2">
-                <span>📊</span>
-                <span>Data Uploads</span>
-              </CardTitle>
-              <CardDescription>
-                View your data uploads and generate insights with enhanced analysis capabilities.
-              </CardDescription>
+          {/* Premium Enterprise Data Table */}
+          <Card className="bg-bg border-border shadow-sm">
+            <CardHeader className="bg-bg-subtle/50 border-b border-border">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-lg bg-brand-primary/10 flex items-center justify-center">
+                    <span className="text-brand-primary text-lg">📊</span>
+                  </div>
+                  <div>
+                    <CardTitle className="text-ink text-lg font-semibold">Data Uploads</CardTitle>
+                    <CardDescription className="text-ink-soft">
+                      Manage and analyze your promotional data files with AI-powered insights
+                    </CardDescription>
+                  </div>
+                </div>
+                {dataUploads.length > 0 && (
+                  <Badge variant="secondary" className="text-xs">
+                    {dataUploads.length} files
+                  </Badge>
+                )}
+              </div>
             </CardHeader>
             <CardContent className="p-0">
               <div className="overflow-x-auto">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="font-semibold">File Name</TableHead>
-                      <TableHead className="font-semibold">Upload Date</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold max-w-md">Insights Preview</TableHead>
-                      <TableHead className="font-semibold">Actions</TableHead>
+                    <TableRow className="bg-bg-subtle border-b border-border">
+                      <TableHead className="font-semibold text-ink h-12 px-6">File Name</TableHead>
+                      <TableHead className="font-semibold text-ink h-12 px-4">Upload Date</TableHead>
+                      <TableHead className="font-semibold text-ink h-12 px-4">Status</TableHead>
+                      <TableHead className="font-semibold text-ink h-12 px-4 max-w-md">AI Insights</TableHead>
+                      <TableHead className="font-semibold text-ink h-12 px-6">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {dataUploads.map((upload) => {
+                    {dataUploads.map((upload, index) => {
                       const isExpanded = expandedInsights[upload._id];
-                      const formattedInsights = formatInsights(upload.insights);
                       const isLoading = loadingInsights[upload._id];
                       
                       return (
-                        <TableRow key={upload._id} className="hover:bg-gray-50 transition-colors">
-                          <TableCell className="font-medium flex items-center space-x-2">
-                            <span className="text-lg">📄</span>
-                            <span>{upload.file_name}</span>
+                        <TableRow 
+                          key={upload._id} 
+                          className={`
+                            transition-colors duration-200 hover:bg-bg-subtle/50 border-b border-border/50
+                            ${index % 2 === 0 ? 'bg-bg' : 'bg-bg-subtle/30'}
+                          `}
+                        >
+                          <TableCell className="font-medium px-6 py-4">
+                            <div className="flex items-center space-x-3">
+                              <div className="w-8 h-8 rounded bg-brand-primary/10 flex items-center justify-center">
+                                <span className="text-brand-primary text-sm">📄</span>
+                              </div>
+                              <span className="text-ink font-medium">{upload.file_name}</span>
+                            </div>
                           </TableCell>
-                          <TableCell className="text-gray-600">
-                            {new Date(upload.upload_timestamp).toLocaleDateString()}
+                          <TableCell className="text-ink-soft px-4 py-4">
+                            {new Date(upload.upload_timestamp).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric'
+                            })}
                           </TableCell>
-                          <TableCell>{getStatusBadge(upload.status)}</TableCell>
-                          <TableCell className="max-w-md">
+                          <TableCell className="px-4 py-4">{getStatusBadge(upload.status)}</TableCell>
+                          <TableCell className="max-w-md px-4 py-4">
                             {upload.insights ? (
                               <div className="space-y-3">
                                 <div className="flex items-center space-x-2">
-                                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-                                  <span className="text-sm font-medium text-green-700">Insights Available</span>
+                                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                                  <span className="text-sm font-medium text-green-700">AI Analysis Complete</span>
                                 </div>
-                                <div className="bg-gradient-to-r from-blue-50 to-purple-50 p-3 rounded-lg border border-blue-200">
-                                  <div className="text-sm text-gray-800 leading-relaxed">
+                                <div className="bg-bg-subtle border border-border rounded-lg p-4">
+                                  <div className="text-sm text-ink leading-relaxed">
                                     {isExpanded ? (
                                       <div className="space-y-2">
                                         {formatInsights(upload.insights).split('.').filter(s => s.trim()).map((sentence, idx) => (
@@ -293,52 +347,54 @@ export default function DataPage() {
                                       variant="ghost"
                                       size="sm"
                                       onClick={() => toggleInsightsExpansion(upload._id)}
-                                      className="mt-2 text-xs text-blue-600 hover:text-blue-800 hover:bg-blue-100"
+                                      className="mt-2 text-xs text-brand-primary hover:text-brand-primary-hover hover:bg-brand-primary/5"
                                     >
-                                      {isExpanded ? '👆 Show Less' : '👇 Show More Details'}
+                                      {isExpanded ? '↑ Show Less' : '↓ Show More'}
                                     </Button>
                                   )}
                                 </div>
                               </div>
                             ) : upload.status === 'Complete' ? (
-                              <div className="flex items-center space-x-2 p-3 bg-orange-50 rounded-lg border border-orange-200">
-                                <div className="w-2 h-2 bg-orange-400 rounded-full animate-bounce"></div>
-                                <span className="text-sm font-medium text-orange-700">Ready for Analysis</span>
+                              <div className="flex items-center space-x-2 p-3 bg-accent/5 rounded-lg border border-accent/20">
+                                <div className="w-2 h-2 bg-accent rounded-full"></div>
+                                <span className="text-sm font-medium text-accent">Ready for AI Analysis</span>
                               </div>
                             ) : (
-                              <div className="flex items-center space-x-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div className="w-2 h-2 bg-gray-400 rounded-full animate-pulse"></div>
-                                <span className="text-sm font-medium text-gray-600">Processing Upload...</span>
+                              <div className="flex items-center space-x-2 p-3 bg-bg-subtle rounded-lg border border-border">
+                                <div className="w-2 h-2 bg-ink-soft rounded-full animate-pulse"></div>
+                                <span className="text-sm font-medium text-ink-soft">Processing...</span>
                               </div>
                             )}
                           </TableCell>
-                          <TableCell>
-                            <div className="flex flex-col space-y-2">
+                          <TableCell className="px-6 py-4">
+                            <div className="flex flex-col space-y-2 w-full max-w-[140px]">
                               <Button 
                                 onClick={() => handleGenerateInsight(upload._id)}
                                 disabled={isLoading || upload.status === 'Pending'}
-                                variant={upload.insights ? "outline" : "default"}
+                                variant={upload.insights ? "outline" : "accent"}
                                 size="sm"
-                                className={`w-full transition-all duration-200 ${
-                                  upload.insights 
-                                    ? 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white border-0' 
-                                    : 'bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white shadow-lg hover:shadow-xl transform hover:scale-105'
-                                }`}
+                                className={`
+                                  w-full transition-all duration-200 min-h-[40px]
+                                  ${upload.insights 
+                                    ? 'text-brand-primary border-brand-primary hover:bg-brand-primary/5' 
+                                    : 'bg-accent text-white hover:bg-accent-hover shadow-sm'
+                                  }
+                                `}
                               >
                                 {isLoading ? (
                                   <>
                                     <div className="animate-spin mr-2 w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
-                                    Generating...
+                                    Analyzing...
                                   </>
                                 ) : upload.insights ? (
                                   <>
                                     <span className="mr-1">🔄</span>
-                                    Regenerate
+                                    Regenerate AI Analysis
                                   </>
                                 ) : (
                                   <>
                                     <span className="mr-1">✨</span>
-                                    Generate Insight
+                                    Run AI Analysis
                                   </>
                                 )}
                               </Button>
@@ -348,19 +404,19 @@ export default function DataPage() {
                                     onClick={() => viewUploadDetails(upload)}
                                     variant="outline"
                                     size="sm"
-                                    className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white border-0 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                    className="w-full text-brand-primary border-brand-primary hover:bg-brand-primary/5 transition-all duration-200 min-h-[40px]"
                                   >
                                     <span className="mr-1">🔍</span>
                                     View Details
                                   </Button>
                                   <Button
                                     onClick={() => copyUploadLink(upload)}
-                                    variant="outline"
+                                    variant="secondary"
                                     size="sm"
-                                    className="w-full bg-gradient-to-r from-orange-400 to-red-400 hover:from-orange-500 hover:to-red-500 text-white border-0 shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200"
+                                    className="w-full bg-bg-subtle text-ink hover:bg-border transition-all duration-200 min-h-[40px]"
                                   >
                                     <span className="mr-1">🔗</span>
-                                    Copy Link
+                                    Share Link
                                   </Button>
                                 </>
                               )}
@@ -388,44 +444,116 @@ export default function DataPage() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="details" className="space-y-6">
+        <TabsContent value="details" className="space-y-8">
           {selectedUpload ? (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div className="space-y-1">
-                  <h2 className="text-2xl font-bold text-gray-800 flex items-center space-x-2">
-                    <span>🔍</span>
-                    <span>Detailed Analysis</span>
-                  </h2>
-                  <p className="text-gray-600">Deep dive into insights for {selectedUpload.file_name}</p>
-                </div>
-                <Button 
-                  onClick={() => setActiveTab("overview")}
-                  variant="outline"
-                  size="sm"
-                  className="flex items-center space-x-1"
-                >
-                  <span>←</span>
-                  <span>Back to Overview</span>
-                </Button>
-              </div>
-              <InsightsViewer
-                insights={selectedUpload.insights}
-                fileName={selectedUpload.file_name}
-                uploadDate={selectedUpload.upload_timestamp}
-                status={selectedUpload.status}
-              />
+            <div className="space-y-6">
+              <Card className="bg-bg border-border shadow-sm">
+                <CardHeader className="bg-bg-subtle/50 border-b border-border">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-4">
+                      <div className="w-12 h-12 rounded-lg bg-brand-primary/10 flex items-center justify-center">
+                        <span className="text-brand-primary text-xl">🔍</span>
+                      </div>
+                      <div className="space-y-1">
+                        <h2 className="text-xl font-semibold text-ink">Detailed AI Analysis</h2>
+                        <p className="text-ink-soft">Deep insights for {selectedUpload.file_name}</p>
+                      </div>
+                    </div>
+                    <Button 
+                      onClick={() => setActiveTab("overview")}
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center space-x-2 text-brand-primary border-brand-primary hover:bg-brand-primary/5"
+                    >
+                      <span>←</span>
+                      <span>Back to Overview</span>
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-6">
+                  <InsightsViewer
+                    insights={selectedUpload.insights}
+                    fileName={selectedUpload.file_name}
+                    uploadDate={selectedUpload.upload_timestamp}
+                    status={selectedUpload.status}
+                  />
+                </CardContent>
+              </Card>
             </div>
           ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">🔍</div>
-              <h3 className="text-xl font-semibold text-gray-700 mb-2">No File Selected</h3>
-              <p className="text-gray-500">Select a file from the overview to view detailed insights</p>
-            </div>
+            <Card className="bg-bg border-border shadow-sm">
+              <CardContent className="text-center py-16">
+                <div className="w-16 h-16 rounded-full bg-bg-subtle flex items-center justify-center mx-auto mb-4">
+                  <span className="text-3xl text-ink-soft">🔍</span>
+                </div>
+                <h3 className="text-lg font-semibold text-ink mb-2">No File Selected</h3>
+                <p className="text-ink-soft">Select a file from the overview tab to view detailed AI insights</p>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>
     </div>
     </ToastProvider>
+  );
+}
+
+// Premium Loading Component for Suspense Boundary
+function DataPageLoading() {
+  return (
+    <div className="space-y-8">
+      {/* Header Skeleton */}
+      <div className="mb-8">
+        <div className="h-8 bg-bg-subtle rounded-lg animate-pulse mb-2"></div>
+        <div className="h-4 bg-bg-subtle rounded-lg animate-pulse w-2/3"></div>
+      </div>
+      
+      {/* Cards Skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i} className="bg-bg-subtle border-border animate-pulse">
+            <CardHeader className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 rounded-lg bg-border"></div>
+                <div className="h-4 bg-border rounded w-20"></div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="h-8 bg-border rounded mb-2"></div>
+              <div className="h-3 bg-border rounded w-24"></div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      
+      {/* Table Skeleton */}
+      <Card className="bg-bg border-border">
+        <CardHeader className="bg-bg-subtle/50 border-b border-border">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-lg bg-border"></div>
+            <div className="space-y-2">
+              <div className="h-5 bg-border rounded w-32"></div>
+              <div className="h-3 bg-border rounded w-48"></div>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="p-6">
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-bg-subtle rounded-lg animate-pulse"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+// Main component with Suspense boundary
+export default function DataPage() {
+  return (
+    <Suspense fallback={<DataPageLoading />}>
+      <DataPageContent />
+    </Suspense>
   );
 }

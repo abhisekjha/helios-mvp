@@ -43,6 +43,7 @@ const config = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          hover: "hsl(var(--accent-hover))",
         },
         popover: {
           DEFAULT: "hsl(var(--popover))",
@@ -52,6 +53,13 @@ const config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        // Enterprise SaaS brand colors
+        "brand-primary": "hsl(var(--brand-primary))",
+        "brand-primary-hover": "hsl(var(--brand-primary-hover))",
+        "bg": "hsl(var(--bg))",
+        "bg-subtle": "hsl(var(--bg-subtle))",
+        "ink": "hsl(var(--ink))",
+        "ink-soft": "hsl(var(--ink-soft))",
       },
       borderRadius: {
         lg: "var(--radius)",

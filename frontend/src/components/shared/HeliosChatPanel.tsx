@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Bot, User, TrendingUp, CheckCircle } from "lucide-react";
+import { X, Send, Bot, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -74,7 +74,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
       // Create agent message placeholder
       const agentMessageId = (Date.now() + 1).toString();
       let agentContent = "";
-      let sources: any[] = [];
+      let sources: Array<{ text: string; type: string; similarity_score: number }> = [];
 
       const agentMessage: Message = {
         id: agentMessageId,
@@ -138,7 +138,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
               } else if (data.type === 'error') {
                 throw new Error(data.error);
               }
-            } catch (parseError) {
+            } catch {
               // Skip invalid JSON lines
             }
           }
@@ -162,24 +162,33 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex">
+    <div className="fixed inset-0 z-40 flex">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      {/* Chat Panel */}
-      <div className="relative ml-auto w-full max-w-md bg-white h-full flex flex-col shadow-2xl">
-        {/* Header */}
-        <div className="p-4 border-b border-slate-200 bg-gradient-to-r from-purple-600 to-blue-600">
+      {/* Premium Enterprise Chat Panel - Fully Opaque */}
+      <div 
+        className="
+          fixed right-0 top-0 h-full w-[440px] 
+          bg-white opacity-100 
+          border-l border-[#E5E7EB] 
+          shadow-[0_1px_2px_rgba(17,24,39,0.04)]
+          z-40 isolate
+          flex flex-col
+        "
+      >
+        {/* Header - Professional Brand Styling */}
+        <div className="p-6 border-b border-[#E5E7EB] bg-white">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center">
+            <div className="flex items-center space-x-4">
+              <div className="w-12 h-12 bg-[#0F1F3D] rounded-lg flex items-center justify-center">
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-white">Helios Agent</h2>
-                <div className="flex items-center space-x-1">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <span className="text-xs text-white/80">Online & Ready</span>
+                <h2 className="text-lg font-semibold text-[#111827]">Helios Agent</h2>
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-[#0F1F3D] rounded-full" />
+                  <span className="text-sm text-[#4B5563]">Online & Ready</span>
                 </div>
               </div>
             </div>
@@ -187,39 +196,43 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
               variant="ghost"
               size="sm"
               onClick={onClose}
-              className="text-white hover:bg-white/20"
+              className="
+                text-[#4B5563] hover:text-[#111827] hover:bg-[#F7F8FA]
+                h-10 w-10 p-0 rounded-lg
+                focus:ring-2 focus:ring-[#0F1F3D] focus:ring-offset-2 focus:outline-none
+              "
             >
               <X className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* Messages Container - Independent Scroll */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
           {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
             >
-              <div className={`flex max-w-[80%] ${message.type === "user" ? "flex-row-reverse" : "flex-row"}`}>
-                <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+              <div className={`flex max-w-[85%] ${message.type === "user" ? "flex-row-reverse" : "flex-row"}`}>
+                <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                   message.type === "user" 
-                    ? "bg-slate-100 ml-2" 
-                    : "bg-gradient-to-r from-purple-600 to-blue-600 mr-2"
+                    ? "bg-[#F7F8FA] ml-3" 
+                    : "bg-[#0F1F3D] mr-3"
                 }`}>
                   {message.type === "user" ? (
-                    <User className="w-4 h-4 text-slate-600" />
+                    <User className="w-5 h-5 text-[#4B5563]" />
                   ) : (
-                    <Bot className="w-4 h-4 text-white" />
+                    <Bot className="w-5 h-5 text-white" />
                   )}
                 </div>
-                <div className="flex flex-col">
-                  <div className={`p-3 rounded-2xl ${
+                <div className="flex flex-col space-y-2">
+                  <div className={`p-4 rounded-xl ${
                     message.type === "user"
-                      ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white"
-                      : "bg-slate-100 text-slate-900"
+                      ? "bg-[#0F1F3D] text-white"
+                      : "bg-[#F7F8FA] text-[#111827]"
                   }`}>
-                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
                   </div>
                   {message.component && (
                     <div className="mt-2">
@@ -227,24 +240,24 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
                     </div>
                   )}
                   {message.sources && message.sources.length > 0 && (
-                    <div className="mt-2">
-                      <Card className="bg-slate-50">
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-xs text-slate-600">Sources</CardTitle>
+                    <div className="mt-3">
+                      <Card className="bg-white border border-[#E5E7EB]">
+                        <CardHeader className="pb-3 pt-4 px-4">
+                          <CardTitle className="text-sm text-[#4B5563] font-medium">Sources</CardTitle>
                         </CardHeader>
-                        <CardContent className="pt-0">
-                          <div className="space-y-1">
+                        <CardContent className="pt-0 px-4 pb-4">
+                          <div className="space-y-3">
                             {message.sources.slice(0, 3).map((source, idx) => (
-                              <div key={idx} className="text-xs text-slate-500 p-2 bg-white rounded border">
-                                <div className="flex items-center justify-between mb-1">
-                                  <Badge variant="outline" className="text-xs">
+                              <div key={idx} className="text-sm text-[#4B5563] p-3 bg-[#F7F8FA] rounded-lg border border-[#E5E7EB]">
+                                <div className="flex items-center justify-between mb-2">
+                                  <Badge variant="secondary" className="text-xs bg-white text-[#4B5563] border border-[#E5E7EB]">
                                     {source.type}
                                   </Badge>
-                                  <span className="text-xs text-slate-400">
+                                  <span className="text-xs text-[#4B5563]">
                                     {(source.similarity_score * 100).toFixed(0)}% match
                                   </span>
                                 </div>
-                                <p className="text-xs">{source.text}</p>
+                                <p className="text-sm text-[#111827] leading-relaxed">{source.text}</p>
                               </div>
                             ))}
                           </div>
@@ -252,7 +265,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
                       </Card>
                     </div>
                   )}
-                  <span className="text-xs text-slate-500 mt-1 px-1">
+                  <span className="text-xs text-[#4B5563] mt-2 px-1">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
@@ -262,15 +275,15 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
           
           {isTyping && (
             <div className="flex justify-start">
-              <div className="flex max-w-[80%]">
-                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-r from-purple-600 to-blue-600 flex items-center justify-center mr-2">
-                  <Bot className="w-4 h-4 text-white" />
+              <div className="flex max-w-[85%]">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0F1F3D] flex items-center justify-center mr-3">
+                  <Bot className="w-5 h-5 text-white" />
                 </div>
-                <div className="bg-slate-100 p-3 rounded-2xl">
+                <div className="bg-[#F7F8FA] p-4 rounded-xl">
                   <div className="flex space-x-1">
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce" />
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-100" />
-                    <div className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-200" />
+                    <div className="w-2 h-2 bg-[#4B5563] rounded-full animate-bounce" />
+                    <div className="w-2 h-2 bg-[#4B5563] rounded-full animate-bounce delay-100" />
+                    <div className="w-2 h-2 bg-[#4B5563] rounded-full animate-bounce delay-200" />
                   </div>
                 </div>
               </div>
@@ -279,9 +292,9 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
-        <div className="p-4 border-t border-slate-200">
-          <div className="flex space-x-2">
+        {/* Input Area - Professional Enterprise Styling */}
+        <div className="p-6 border-t border-[#E5E7EB] bg-white">
+          <div className="flex space-x-3">
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
@@ -293,19 +306,30 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
                   handleSendMessage();
                 }
               }}
-              className="flex-1"
+              className="
+                flex-1 bg-white border border-[#E5E7EB] text-[#111827] text-base
+                placeholder:text-[#4B5563] rounded-lg px-4 py-3 min-h-[48px]
+                focus:ring-2 focus:ring-[#0F1F3D] focus:border-[#0F1F3D] focus:outline-none
+                disabled:bg-[#F7F8FA] disabled:text-[#4B5563]
+              "
             />
             <Button
               onClick={handleSendMessage}
               disabled={!inputValue.trim() || isTyping || !goalId}
-              className="bg-gradient-to-r from-purple-600 to-blue-600"
+              className="
+                bg-[#0F1F3D] text-white hover:bg-[#152C57] 
+                disabled:bg-[#E5E7EB] disabled:text-[#4B5563]
+                px-4 py-3 min-h-[48px] rounded-lg
+                focus:ring-2 focus:ring-[#0F1F3D] focus:ring-offset-2 focus:outline-none
+                transition-colors duration-200
+              "
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             </Button>
           </div>
-          <p className="text-xs text-slate-500 mt-2 text-center">
+          <p className="text-sm text-[#4B5563] mt-4 text-center leading-relaxed">
             {goalId 
-              ? "Ask questions about your uploaded data"
+              ? "Ask questions about your uploaded data and promotional strategies"
               : "Select a goal to start chatting with Helios"
             }
           </p>

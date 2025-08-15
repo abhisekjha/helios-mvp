@@ -44,48 +44,72 @@
 }
 
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --card: 0 0% 100%;
-  --card-foreground: 222.2 84% 4.9%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 222.2 84% 4.9%;
-  --primary: 222.2 47.4% 11.2%;
-  --primary-foreground: 210 40% 98%;
-  --secondary: 210 40% 96.1%;
-  --secondary-foreground: 222.2 47.4% 11.2%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --accent: 210 40% 96.1%;
-  --accent-foreground: 222.2 47.4% 11.2%;
-  --destructive: 0 84.2% 60.2%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --input: 214.3 31.8% 91.4%;
-  --ring: 222.2 84% 4.9%;
+  /* Enterprise SaaS Design Tokens */
+  --brand-primary: 222 73% 14%; /* #0F1F3D - deep brand color */
+  --brand-primary-hover: 222 73% 18%; /* #152C57 - hover state */
+  --accent: 38 92% 50%; /* #F59E0B - warm accent */
+  --accent-hover: 32 95% 44%; /* #D97706 - hover state */
+  --bg: 0 0% 100%; /* #FFFFFF - pure white */
+  --bg-subtle: 220 9% 97%; /* #F7F8FA - subtle background */
+  --border: 220 13% 91%; /* #E5E7EB - subtle borders */
+  --ink: 220 9% 7%; /* #111827 - primary text */
+  --ink-soft: 220 9% 30%; /* #4B5563 - secondary text */
+  
+  /* Legacy Tokens for Compatibility */
+  --background: var(--bg);
+  --background-subtle: var(--bg-subtle);
+  --foreground: var(--ink);
+  --foreground-secondary: var(--ink-soft);
+  
+  /* UI Colors */
+  --card: var(--bg-subtle);
+  --card-foreground: var(--ink);
+  --popover: var(--bg);
+  --popover-foreground: var(--ink);
+  --primary: var(--brand-primary);
+  --primary-foreground: var(--bg);
+  --secondary: var(--border);
+  --secondary-foreground: var(--ink);
+  --muted: var(--bg-subtle);
+  --muted-foreground: var(--ink-soft);
+  --accent-foreground: var(--bg);
+  --destructive: 0 84% 50%;
+  --destructive-foreground: var(--bg);
+  --input: var(--border);
+  --ring: var(--brand-primary);
   --radius: 0.5rem;
+  
+  /* Chart Colors - Muted navies/greys with accent highlight */
+  --chart-1: 220 9% 46%; /* Muted grey */
+  --chart-2: 222 47% 31%; /* Muted navy */
+  --chart-3: 220 9% 70%; /* Light grey */
+  --chart-4: 222 25% 55%; /* Medium navy */
+  --chart-5: 38 92% 50%; /* Accent highlight */
 }
 
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --card: 222.2 84% 4.9%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222.2 84% 4.9%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 210 40% 98%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --secondary: 217.2 32.6% 17.5%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --accent: 217.2 32.6% 17.5%;
-  --accent-foreground: 210 40% 98%;
-  --destructive: 0 62.8% 30.6%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217.2 32.6% 17.5%;
-  --input: 217.2 32.6% 17.5%;
-  --ring: 212.7 26.8% 83.9%;
+  /* Keep dark mode subtle for professional use */
+  --background: 222 73% 6%; /* Very dark brand color */
+  --background-subtle: 222 47% 9%;
+  --foreground: 0 0% 95%;
+  --foreground-secondary: 220 9% 70%;
+  --card: 222 47% 9%;
+  --card-foreground: 0 0% 95%;
+  --popover: 222 47% 9%;
+  --popover-foreground: 0 0% 95%;
+  --primary: 0 0% 95%;
+  --primary-foreground: 222 73% 14%;
+  --secondary: 222 25% 15%;
+  --secondary-foreground: 0 0% 95%;
+  --muted: 222 25% 15%;
+  --muted-foreground: 220 9% 70%;
+  --accent: 38 92% 50%; /* Keep accent consistent */
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 84% 50%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 222 25% 15%;
+  --input: 222 25% 15%;
+  --ring: 0 0% 95%;
 }
 
 @layer base {
@@ -94,5 +118,36 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 16px; /* Base font size for body text */
+    line-height: 1.5;
+  }
+  
+  /* Typography styles */
+  h1, h2, h3, h4, h5, h6 {
+    font-weight: 600; /* Semibold for headings */
+  }
+  
+  /* 8px spacing grid utilities */
+  .space-xs { gap: 8px; }
+  .space-sm { gap: 16px; }
+  .space-md { gap: 24px; }
+  .space-lg { gap: 32px; }
+  .space-xl { gap: 40px; }
+  
+  /* Professional button styles */
+  .btn-brand {
+    background: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  .btn-brand:hover {
+    background: hsl(var(--brand-primary-hover));
+  }
+  
+  .btn-accent {
+    background: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+  .btn-accent:hover {
+    background: hsl(var(--accent-warning-hover));
   }
 }
