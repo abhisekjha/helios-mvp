@@ -29,22 +29,31 @@ def validate_csv_file(upload_id: str):
 
         crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.VALIDATING)
 
-        required_headers = {'Date', 'Sales', 'CompetitorPrice'}
-        
+        # Flexible CSV validation - check for valid structure rather than specific headers
         with open(data_upload.file_path, 'r') as f:
             reader = csv.reader(f)
             headers = next(reader)
             
-            if required_headers.issubset(set(headers)):
-                crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.COMPLETE)
-                
-                # Update goal status to processing
-                goal = crud_goal.get(db, id=data_upload.goal_id)
-                if goal:
-                    crud_goal.update(db, db_obj=goal, obj_in=GoalUpdate(status=GoalStatus.PROCESSING))
-                    
-                # Trigger insight generation
-                generate_insights_from_upload.delay(upload_id)
+            # Basic validation: must have at least 2 columns and some data
+            if len(headers) >= 2:
+                # Check if there's at least one data row
+                try:
+                    first_row = next(reader)
+                    if len(first_row) >= 2:  # Valid CSV with data
+                        crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.COMPLETE)
+                        
+                        # Update goal status to processing
+                        goal = crud_goal.get(db, id=data_upload.goal_id)
+                        if goal:
+                            crud_goal.update(db, db_obj=goal, obj_in=GoalUpdate(status=GoalStatus.PROCESSING))
+                            
+                        # Trigger insight generation
+                        generate_insights_from_upload.delay(upload_id)
+                    else:
+                        crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.FAILED)
+                except StopIteration:
+                    # No data rows
+                    crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.FAILED)
             else:
                 crud_data_upload.update_data_upload_status(db, upload_id=upload_id, status=Status.FAILED)
                 

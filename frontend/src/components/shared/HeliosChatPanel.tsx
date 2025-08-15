@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Bot, User } from "lucide-react";
+import { X, Send, Bot, User, Maximize2, Minimize2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { DataVisualizationPanel, parseInsightsFromText, InsightData } from '@/components/insights/DataVisualizationPanel';
 
 interface Message {
   id: string;
@@ -13,6 +14,7 @@ interface Message {
   content: string;
   timestamp: Date;
   component?: React.ReactNode;
+  insights?: InsightData[];
   sources?: Array<{
     text: string;
     type: string;
@@ -62,6 +64,17 @@ What would you like to explore today?`,
   const [inputValue, setInputValue] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  
+  // Resizable panel state
+  const [panelWidth, setPanelWidth] = useState(480); // Default width
+  const [isMaximized, setIsMaximized] = useState(false);
+  const [isResizing, setIsResizing] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startWidth, setStartWidth] = useState(0);
+  
+  // Minimum and maximum panel widths
+  const MIN_WIDTH = 320;
+  const MAX_WIDTH = 800;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -70,6 +83,47 @@ What would you like to explore today?`,
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Resizing functionality
+  const handleMouseDown = (e: React.MouseEvent) => {
+    setIsResizing(true);
+    setStartX(e.clientX);
+    setStartWidth(panelWidth);
+    e.preventDefault();
+  };
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!isResizing) return;
+      
+      const deltaX = startX - e.clientX;
+      const newWidth = Math.min(Math.max(startWidth + deltaX, MIN_WIDTH), MAX_WIDTH);
+      setPanelWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      setIsResizing(false);
+    };
+
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, [isResizing, startX, startWidth]);
+
+  const handleMaximize = () => {
+    setIsMaximized(!isMaximized);
+    if (!isMaximized) {
+      setPanelWidth(Math.min(window.innerWidth * 0.6, MAX_WIDTH));
+    } else {
+      setPanelWidth(480);
+    }
+  };
 
   const handleGeneralQuery = async (query: string) => {
     // Simulate processing time
@@ -324,9 +378,13 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                   progress: 100,
                   isComplete: true
                 };
+                
+                // Parse insights from the final content
+                const insights = parseInsightsFromText(agentContent);
+                
                 setMessages(prev => prev.map(msg => 
                   msg.id === agentMessageId 
-                    ? { ...msg, content: agentContent, sources, agentActivity }
+                    ? { ...msg, content: agentContent, sources, agentActivity, insights }
                     : msg
                 ));
                 break;
@@ -360,6 +418,16 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
         }
       }
 
+      // Final processing: parse insights from complete content
+      if (agentContent.trim()) {
+        const insights = parseInsightsFromText(agentContent);
+        setMessages(prev => prev.map(msg => 
+          msg.id === agentMessageId 
+            ? { ...msg, insights }
+            : msg
+        ));
+      }
+
     } catch (error) {
       console.error('Chat error:', error);
       const errorMessage: Message = {
@@ -381,50 +449,91 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/50" onClick={onClose} />
       
-      {/* Premium Enterprise Chat Panel - Fully Opaque */}
+      {/* Resizable Enhanced Chat Panel */}
       <div 
         className="
-          fixed right-0 top-0 h-full w-[440px] 
+          fixed right-0 top-0 h-full
           bg-white opacity-100 
           border-l border-[#E5E7EB] 
-          shadow-[0_1px_2px_rgba(17,24,39,0.04)]
+          shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)]
           z-40 isolate
           flex flex-col
+          transition-all duration-200 ease-in-out
         "
+        style={{ 
+          width: isMaximized ? '60vw' : `${panelWidth}px`,
+          minWidth: `${MIN_WIDTH}px`,
+          maxWidth: `${MAX_WIDTH}px`
+        }}
       >
-        {/* Header - Professional Brand Styling */}
-        <div className="p-6 border-b border-[#E5E7EB] bg-white">
+        {/* Resize Handle */}
+        <div 
+          className="absolute left-0 top-0 w-1 h-full cursor-col-resize bg-transparent hover:bg-blue-500 transition-colors duration-200 group"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="absolute left-0 top-1/2 transform -translate-y-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <GripVertical className="w-4 h-4 text-blue-500" />
+          </div>
+        </div>
+        
+        {/* Enhanced Header */}
+        <div className="p-6 border-b border-[#E5E7EB] bg-gradient-to-r from-slate-50 to-blue-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-[#0F1F3D] rounded-lg flex items-center justify-center">
+              <div className="w-12 h-12 bg-gradient-to-br from-[#0F1F3D] to-[#1e3a8a] rounded-xl flex items-center justify-center shadow-lg">
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-[#111827]">Helios AgentSpace</h2>
+                <h2 className="text-lg font-semibold text-[#111827] flex items-center space-x-2">
+                  <span>Helios AgentSpace</span>
+                  {goalId && (
+                    <Badge variant="outline" className="text-xs bg-blue-100 text-blue-700 border-blue-300">
+                      Goal Context
+                    </Badge>
+                  )}
+                </h2>
                 <div className="flex items-center space-x-2">
-                  <div className="w-2 h-2 bg-[#0F1F3D] rounded-full" />
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
                   <span className="text-sm text-[#4B5563]">Online & Ready</span>
                 </div>
               </div>
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onClose}
-              className="
-                text-[#4B5563] hover:text-[#111827] hover:bg-[#F7F8FA]
-                h-10 w-10 p-0 rounded-lg
-                focus:ring-2 focus:ring-[#0F1F3D] focus:ring-offset-2 focus:outline-none
-              "
-            >
-              <X className="w-5 h-5" />
-            </Button>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleMaximize}
+                className="
+                  text-[#4B5563] hover:text-[#111827] hover:bg-[#F7F8FA]
+                  h-9 w-9 p-0 rounded-lg
+                  focus:ring-2 focus:ring-[#0F1F3D] focus:ring-offset-2 focus:outline-none
+                "
+                title={isMaximized ? "Restore" : "Maximize"}
+              >
+                {isMaximized ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={onClose}
+                className="
+                  text-[#4B5563] hover:text-[#111827] hover:bg-[#F7F8FA]
+                  h-9 w-9 p-0 rounded-lg
+                  focus:ring-2 focus:ring-[#0F1F3D] focus:ring-offset-2 focus:outline-none
+                "
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
-        {/* Messages Container - Independent Scroll */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-white">
-          {messages.map((message) => (
+        {/* Enhanced Messages Container */}
+        <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-white to-slate-50 relative">
+          {/* Scrollable content with better spacing */}
+          <div className="space-y-6">
+            {messages.map((message) => (
             <div
               key={message.id}
               className={`flex ${message.type === "user" ? "justify-end" : "justify-start"}`}
@@ -578,6 +687,18 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                       </Card>
                     </div>
                   )}
+                  
+                  {/* Enhanced Data Visualization Panel */}
+                  {message.type === "agent" && message.insights && message.insights.length > 0 && (
+                    <div className="mt-4">
+                      <DataVisualizationPanel 
+                        insights={message.insights}
+                        title="Generated Insights"
+                        className="max-w-full"
+                      />
+                    </div>
+                  )}
+                  
                   <span className="text-xs text-[#4B5563] mt-2 px-1">
                     {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
@@ -603,6 +724,7 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
             </div>
           )}
           <div ref={messagesEndRef} />
+          </div>
         </div>
 
         {/* Input Area - Professional Enterprise Styling */}

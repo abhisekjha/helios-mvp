@@ -1,0 +1,31 @@
+Employee_ID,Name,Department,Position,Salary,Start_Date,Age,Performance_Score,Manager_ID,Location
+EMP_001,John Smith,Engineering,Senior Developer,95000,2022-03-15,32,4.2,MGR_001,New York
+EMP_002,Sarah Johnson,Marketing,Marketing Manager,78000,2021-07-10,29,4.5,MGR_002,Los Angeles
+EMP_003,Michael Brown,Sales,Sales Representative,52000,2023-01-20,26,3.8,MGR_003,Chicago
+EMP_004,Emily Davis,Engineering,Junior Developer,68000,2023-06-01,24,4.0,MGR_001,New York
+EMP_005,David Wilson,Finance,Financial Analyst,71000,2022-09-12,30,4.3,MGR_004,New York
+EMP_006,Lisa Garcia,HR,HR Specialist,59000,2021-11-05,28,4.1,MGR_005,Los Angeles
+EMP_007,Robert Miller,Engineering,Lead Developer,110000,2020-02-18,35,4.7,MGR_001,New York
+EMP_008,Jessica Martinez,Marketing,Content Specialist,56000,2023-03-22,25,3.9,MGR_002,Los Angeles
+EMP_009,Christopher Lee,Sales,Sales Manager,89000,2021-05-30,33,4.4,MGR_003,Chicago
+EMP_010,Amanda Taylor,Engineering,DevOps Engineer,82000,2022-12-08,31,4.2,MGR_001,New York
+EMP_011,James Anderson,Finance,Senior Accountant,64000,2022-01-15,27,4.0,MGR_004,New York
+EMP_012,Michelle Thomas,HR,Recruiter,48000,2023-08-10,26,3.7,MGR_005,Los Angeles
+EMP_013,Kevin Jackson,Engineering,QA Engineer,72000,2021-10-25,29,4.1,MGR_001,New York
+EMP_014,Rachel White,Marketing,Digital Marketing Manager,73000,2022-04-12,30,4.3,MGR_002,Los Angeles
+EMP_015,Daniel Harris,Sales,Senior Sales Representative,61000,2022-11-03,28,4.0,MGR_003,Chicago
+EMP_016,Laura Clark,Engineering,Frontend Developer,75000,2023-02-14,27,4.2,MGR_001,New York
+EMP_017,Mark Lewis,Finance,Controller,95000,2020-08-20,38,4.6,MGR_004,New York
+EMP_018,Nicole Robinson,HR,HR Manager,82000,2019-12-01,36,4.5,MGR_005,Los Angeles
+EMP_019,Brian Walker,Engineering,Backend Developer,79000,2022-07-18,30,4.1,MGR_001,New York
+EMP_020,Jennifer Hall,Marketing,Product Marketing Manager,81000,2021-09-25,32,4.4,MGR_002,Los Angeles
+EMP_021,Ryan Allen,Sales,Account Manager,67000,2023-04-05,29,3.9,MGR_003,Chicago
+EMP_022,Stephanie Young,Engineering,Data Scientist,98000,2022-05-30,31,4.6,MGR_001,New York
+EMP_023,Andrew King,Finance,Budget Analyst,58000,2023-07-12,25,3.8,MGR_004,New York
+EMP_024,Melissa Wright,HR,Benefits Coordinator,52000,2022-10-08,27,4.0,MGR_005,Los Angeles
+EMP_025,Gregory Lopez,Engineering,Security Engineer,87000,2021-12-20,33,4.3,MGR_001,New York
+EMP_026,Kimberly Hill,Marketing,Brand Manager,70000,2022-08-15,28,4.2,MGR_002,Los Angeles
+EMP_027,Jason Scott,Sales,Territory Manager,74000,2021-06-18,34,4.1,MGR_003,Chicago
+EMP_028,Ashley Green,Engineering,Mobile Developer,73000,2023-01-09,26,4.0,MGR_001,New York
+EMP_029,Steven Adams,Finance,Treasury Analyst,69000,2022-03-28,29,4.2,MGR_004,New York
+EMP_030,Brittany Baker,HR,Training Specialist,55000,2023-05-16,24,3.9,MGR_005,Los Angeles

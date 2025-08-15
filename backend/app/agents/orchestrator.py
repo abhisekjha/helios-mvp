@@ -143,8 +143,18 @@ class AgentOrchestrator:
                     })
                     
                     if retrieval_response.success:
-                        retrieved_data.extend(retrieval_response.response.data)
-                        yield f"✅ Retrieved {len(retrieval_response.response.data)} relevant data points\n"
+                        response_data = retrieval_response.response.data
+                        logger.info(f"Retrieval response data: {len(response_data)} items")
+                        for i, item in enumerate(response_data[:3]):  # Log first 3 items
+                            item_type = item.get("type", "unknown")
+                            content_len = len(item.get("content", ""))
+                            insights_count = len(item.get("data_insights", []))
+                            logger.info(f"  Response item {i+1}: type={item_type}, content_len={content_len}, insights={insights_count}")
+                        
+                        retrieved_data.extend(response_data)
+                        logger.info(f"Retrieved data total after merge: {len(retrieved_data)} items")
+                        
+                        yield f"✅ Retrieved {len(response_data)} relevant data points\n"
                         await asyncio.sleep(0.1)
                     else:
                         yield f"⚠️ Retrieval had issues: {retrieval_response.error}\n"
@@ -264,6 +274,11 @@ class AgentOrchestrator:
             execution_plan = routing_response.response.get("execution_plan", [])
             classification = routing_response.response.get("classification", {})
             
+            # Debug: Log execution plan
+            logger.info(f"📋 Execution plan has {len(execution_plan)} steps:")
+            for i, step in enumerate(execution_plan):
+                logger.info(f"  Step {i+1}: agent={step.get('agent')}, action={step.get('action')}")
+            
             # Step 2: Execute retrieval steps
             retrieved_data = []
             
@@ -282,14 +297,56 @@ class AgentOrchestrator:
                     })
                     
                     if retrieval_response.success:
-                        retrieved_data.extend(retrieval_response.response.data)
+                        new_data = retrieval_response.response.data
+                        logger.info(f"🔄 Step {step.get('action', 'unknown')}: Retrieved {len(new_data)} items")
+                        
+                        # Debug: Log data types being added
+                        csv_count = sum(1 for item in new_data if item.get("type") == "csv_data")
+                        vector_count = sum(1 for item in new_data if item.get("type") == "vector_search")
+                        logger.info(f"  Adding: {csv_count} CSV items, {vector_count} vector items")
+                        
+                        # Debug: Show actual content of new_data
+                        logger.info(f"🔍 Actual content of new_data from retrieval:")
+                        for i, item in enumerate(new_data[:3]):
+                            logger.info(f"  new_data item {i+1}: type={item.get('type')}, content_len={len(item.get('content', ''))}, insights={len(item.get('data_insights', []))}")
+                        
+                        retrieved_data.extend(new_data)
+                        logger.info(f"  Total data now: {len(retrieved_data)} items")
             
             # Step 3: Synthesize response
+            logger.info(f"🧠 Preparing data for synthesizer: {len(retrieved_data)} items")
+            
+            # Debug: Log final data breakdown
+            final_csv_count = sum(1 for item in retrieved_data if item.get("type") == "csv_data")
+            final_vector_count = sum(1 for item in retrieved_data if item.get("type") == "vector_search")
+            total_insights = sum(len(item.get("data_insights", [])) for item in retrieved_data)
+            logger.info(f"  Final breakdown: {final_csv_count} CSV items, {final_vector_count} vector items, {total_insights} insights")
+            
+            # Debug: Check if context has retrieved_data that might override
+            logger.info(f"📋 Original context keys: {list(context.keys())}")
+            if "retrieved_data" in context:
+                logger.info(f"⚠️  WARNING: Context already has retrieved_data with {len(context['retrieved_data'])} items!")
+            
+            # Debug: Show actual first few items before context creation
+            logger.info(f"🔍 Retrieved_data BEFORE context creation:")
+            for i, item in enumerate(retrieved_data[:3]):
+                logger.info(f"  Before item {i+1}: type={item.get('type')}, content_len={len(item.get('content', ''))}, insights={len(item.get('data_insights', []))}")
+            
             synthesis_context = {
                 **context,
                 "retrieved_data": retrieved_data,
                 "synthesis_type": self._determine_synthesis_type(classification)
             }
+            
+            # Debug: Show actual first few items after context creation  
+            logger.info(f"🔍 Retrieved_data AFTER context creation:")
+            for i, item in enumerate(synthesis_context['retrieved_data'][:3]):
+                logger.info(f"  After item {i+1}: type={item.get('type')}, content_len={len(item.get('content', ''))}, insights={len(item.get('data_insights', []))}")
+            
+            # Debug: Log what we're actually passing to synthesizer
+            logger.info(f"🔍 About to call synthesizer with context containing {len(synthesis_context['retrieved_data'])} items:")
+            for i, item in enumerate(synthesis_context['retrieved_data'][:3]):
+                logger.info(f"  Context item {i+1}: type={item.get('type')}, content_len={len(item.get('content', ''))}, insights={len(item.get('data_insights', []))}")
             
             synthesis_response = await self.synthesizer.execute(query, synthesis_context)
             result.agent_logs.append({

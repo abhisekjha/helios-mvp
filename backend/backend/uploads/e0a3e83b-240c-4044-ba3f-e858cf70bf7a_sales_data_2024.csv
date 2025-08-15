@@ -1,0 +1,51 @@
+Date,Product,Category,Sales_Amount,Units_Sold,Customer_ID,Region,Channel,Discount_Percent
+2024-01-15,Laptop Pro X1,Electronics,1299.99,1,CUST_001,North,Online,5.0
+2024-01-16,Wireless Headphones,Electronics,199.99,2,CUST_002,South,Retail,10.0
+2024-01-18,Office Chair Deluxe,Furniture,599.99,1,CUST_003,East,Online,0.0
+2024-01-20,Gaming Monitor 27",Electronics,449.99,1,CUST_004,West,Online,15.0
+2024-01-22,Standing Desk,Furniture,799.99,1,CUST_005,North,Retail,8.0
+2024-01-25,Smartphone Z5,Electronics,899.99,1,CUST_006,South,Online,12.0
+2024-01-28,Coffee Machine Pro,Appliances,299.99,1,CUST_007,East,Retail,0.0
+2024-02-01,Laptop Pro X1,Electronics,1299.99,2,CUST_008,West,Online,5.0
+2024-02-03,Wireless Mouse,Electronics,79.99,3,CUST_009,North,Online,20.0
+2024-02-05,Ergonomic Keyboard,Electronics,149.99,1,CUST_010,South,Retail,0.0
+2024-02-08,Air Purifier,Appliances,399.99,1,CUST_011,East,Online,25.0
+2024-02-10,Gaming Chair,Furniture,699.99,1,CUST_012,West,Retail,10.0
+2024-02-12,Tablet X10,Electronics,649.99,1,CUST_013,North,Online,7.0
+2024-02-15,Smart Watch,Electronics,349.99,2,CUST_014,South,Online,18.0
+2024-02-18,Desk Lamp LED,Furniture,89.99,1,CUST_015,East,Retail,0.0
+2024-02-20,Wireless Charger,Electronics,49.99,4,CUST_016,West,Online,15.0
+2024-02-22,Vacuum Cleaner,Appliances,249.99,1,CUST_017,North,Retail,12.0
+2024-02-25,Monitor Stand,Furniture,129.99,1,CUST_018,South,Online,0.0
+2024-02-28,Bluetooth Speaker,Electronics,179.99,2,CUST_019,East,Online,22.0
+2024-03-01,Laptop Pro X1,Electronics,1299.99,1,CUST_020,West,Retail,5.0
+2024-03-03,Coffee Grinder,Appliances,159.99,1,CUST_021,North,Online,8.0
+2024-03-05,Wireless Headphones,Electronics,199.99,3,CUST_022,South,Online,10.0
+2024-03-08,Standing Desk,Furniture,799.99,1,CUST_023,East,Retail,8.0
+2024-03-10,Gaming Monitor 27",Electronics,449.99,2,CUST_024,West,Online,15.0
+2024-03-12,Smartphone Z5,Electronics,899.99,1,CUST_025,North,Online,12.0
+2024-03-15,Office Chair Deluxe,Furniture,599.99,1,CUST_026,South,Retail,0.0
+2024-03-18,Air Fryer,Appliances,199.99,1,CUST_027,East,Online,20.0
+2024-03-20,Webcam HD,Electronics,119.99,2,CUST_028,West,Online,0.0
+2024-03-22,Desk Organizer,Furniture,39.99,3,CUST_029,North,Retail,5.0
+2024-03-25,Smart Thermostat,Electronics,249.99,1,CUST_030,South,Online,15.0
+2024-03-28,Microwave Oven,Appliances,179.99,1,CUST_031,East,Retail,10.0
+2024-04-01,Laptop Pro X1,Electronics,1299.99,1,CUST_032,West,Online,5.0
+2024-04-03,Wireless Mouse,Electronics,79.99,2,CUST_033,North,Online,20.0
+2024-04-05,Gaming Chair,Furniture,699.99,1,CUST_034,South,Retail,10.0
+2024-04-08,Tablet X10,Electronics,649.99,1,CUST_035,East,Online,7.0
+2024-04-10,Smart Watch,Electronics,349.99,1,CUST_036,West,Online,18.0
+2024-04-12,Blender Pro,Appliances,129.99,1,CUST_037,North,Retail,0.0
+2024-04-15,Monitor Arm,Furniture,199.99,1,CUST_038,South,Online,12.0
+2024-04-18,Wireless Headphones,Electronics,199.99,2,CUST_039,East,Online,10.0
+2024-04-20,Coffee Machine Pro,Appliances,299.99,1,CUST_040,West,Retail,0.0
+2024-04-22,Gaming Monitor 27",Electronics,449.99,1,CUST_041,North,Online,15.0
+2024-04-25,Standing Desk,Furniture,799.99,1,CUST_042,South,Retail,8.0
+2024-04-28,Smartphone Z5,Electronics,899.99,1,CUST_043,East,Online,12.0
+2024-05-01,Air Purifier,Appliances,399.99,1,CUST_044,West,Online,25.0
+2024-05-03,Ergonomic Keyboard,Electronics,149.99,2,CUST_045,North,Retail,0.0
+2024-05-05,Office Chair Deluxe,Furniture,599.99,1,CUST_046,South,Online,0.0
+2024-05-08,Wireless Charger,Electronics,49.99,3,CUST_047,East,Online,15.0
+2024-05-10,Vacuum Cleaner,Appliances,249.99,1,CUST_048,West,Retail,12.0
+2024-05-12,Desk Lamp LED,Furniture,89.99,2,CUST_049,North,Online,0.0
+2024-05-15,Bluetooth Speaker,Electronics,179.99,1,CUST_050,South,Retail,22.0

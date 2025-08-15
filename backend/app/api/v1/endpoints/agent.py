@@ -249,6 +249,42 @@ async def query_agent(
         )
 
 
+@router.post("/test-query")
+async def test_query_agent(
+    request: AgentQueryRequest,
+    db = Depends(get_database)
+):
+    """
+    Test endpoint without authentication for debugging CSV data flow.
+    """
+    embedding_service = get_embedding_service(db)
+    agent = ConversationAgent(db, embedding_service)
+    
+    # Create a mock user for testing
+    mock_user = User(
+        id="1",
+        email="test@test.com",
+        is_active=True,
+        hashed_password="test",
+        role="user"
+    )
+    
+    # Return regular JSON response using Multi-Agent System
+    result = await agent.generate_response(
+        request.goal_id,
+        request.query,
+        mock_user
+    )
+    
+    return AgentQueryResponse(
+        goal_id=request.goal_id,
+        query=request.query,
+        response=result["response"],
+        sources=result["sources"],
+        timestamp=datetime.utcnow()
+    )
+
+
 @router.get("/knowledge-stats/{goal_id}")
 async def get_knowledge_stats(
     goal_id: str,

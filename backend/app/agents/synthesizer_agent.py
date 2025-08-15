@@ -140,24 +140,122 @@ class SynthesizerAgent(BaseAgent):
         """
         Generate the main response using OpenAI.
         """
-        # Prepare context from retrieved data
+        # Prepare context from retrieved data with enhanced CSV handling
         context_chunks = []
-        for item in retrieved_data[:10]:  # Limit to top 10 results
+        csv_data_found = False
+        total_csv_insights = 0
+        
+        # Debug logging
+        logger.info(f"Processing {len(retrieved_data)} retrieved data items for synthesis")
+        for i, item in enumerate(retrieved_data[:5]):  # Log first 5 items
+            item_type = item.get("type", "unknown")
+            content_len = len(item.get("content", ""))
+            insights_count = len(item.get("data_insights", []))
+            logger.info(f"  Item {i+1}: type={item_type}, content_len={content_len}, insights={insights_count}")
+            if item_type == "csv_data":
+                logger.info(f"    CSV insights preview: {item.get('data_insights', [])[:2]}")
+        
+        for item in retrieved_data:  # Process ALL items, not just first 10
             content = item.get("content", "")
             score = item.get("similarity_score", 0)
-            context_chunks.append(f"[Relevance: {score:.2f}] {content}")
+            data_type = item.get("type", "")
+            
+            # Enhanced handling for CSV data
+            if data_type == "csv_data":
+                csv_data_found = True
+                file_name = item.get("metadata", {}).get("file_name", "uploaded data")
+                rows = item.get("metadata", {}).get("rows", 0)
+                columns = item.get("metadata", {}).get("columns", [])
+                data_insights = item.get("data_insights", [])
+                raw_data_sample = item.get("raw_data_sample", [])
+                
+                total_csv_insights += len(data_insights)
+                logger.info(f"CSV file {file_name}: {len(data_insights)} insights, content length: {len(content)}")
+                
+                # Build comprehensive CSV context with enhanced insights
+                csv_context = f"📊 BUSINESS DATA FILE: {file_name}\n"
+                csv_context += f"📋 Structure: {rows} rows, {len(columns)} columns ({', '.join(columns[:5])}{'...' if len(columns) > 5 else ''})\n"
+                
+                # Priority 1: Business insights from enhanced analysis
+                if data_insights:
+                    csv_context += f"\n💡 BUSINESS INTELLIGENCE ANALYSIS:\n"
+                    for insight in data_insights:
+                        csv_context += f"• {insight}\n"
+                
+                # Priority 2: File overview
+                if content and content.strip():
+                    csv_context += f"\n📈 DATA OVERVIEW: {content}\n"
+                
+                # Priority 3: Sample data for context
+                if raw_data_sample and len(raw_data_sample) > 0:
+                    csv_context += f"\n📋 DATA SAMPLE (First 3 rows):\n"
+                    for i, row in enumerate(raw_data_sample[:3]):
+                        csv_context += f"   Row {i+1}: {row}\n"
+                
+                context_chunks.append(f"[HIGH RELEVANCE CSV DATA - Score: {score:.2f}]\n{csv_context}")
+            else:
+                # Limit vector search results to avoid overwhelming the prompt
+                if len([c for c in context_chunks if "HIGH RELEVANCE CSV DATA" not in c]) < 5:
+                    context_chunks.append(f"[Relevance: {score:.2f}] {content}")
         
         context_text = "\n\n".join(context_chunks)
+        logger.info(f"Synthesis context prepared: CSV data found={csv_data_found}, total insights={total_csv_insights}, context length={len(context_text)}")
         
-        # Create system prompt based on synthesis type
-        if synthesis_type == "analytical":
-            system_prompt = """You are a senior business analyst. Analyze the provided data and give a comprehensive, analytical response. Include specific numbers, trends, and insights. Focus on what the data reveals about business performance."""
-        elif synthesis_type == "strategic":
-            system_prompt = """You are a strategic business consultant. Provide strategic insights and actionable recommendations based on the data. Focus on implications and next steps for business growth."""
+        # Create enhanced system prompt based on synthesis type and data availability
+        if csv_data_found:
+            if synthesis_type == "analytical":
+                system_prompt = """You are a senior business data analyst specializing in CSV data analysis with direct access to business intelligence data. You have rich business insights including revenue analysis, customer segmentation, profit margins, growth trends, and operational metrics. 
+
+CRITICAL: You have access to comprehensive business intelligence insights with specific numbers, percentages, and calculated metrics. Use these exact figures in your response. Do NOT say you don't have data - you have detailed business analysis available.
+
+Analyze the provided business intelligence data and give a comprehensive, analytical response with specific numbers, trends, calculations, and insights. Reference actual data values and provide detailed statistical analysis."""
+
+            elif synthesis_type == "strategic":
+                system_prompt = """You are a strategic business consultant with access to comprehensive business intelligence data including financial performance, customer analytics, operational metrics, and market insights.
+
+CRITICAL: You have detailed business data with specific revenue figures, growth rates, customer segmentation, profit margins, and operational metrics. Use these exact numbers to provide strategic recommendations. Do NOT claim lack of data - you have rich business intelligence available.
+
+Use the provided business intelligence to give strategic insights and actionable recommendations. Focus on business implications, growth opportunities, and data-driven next steps using the specific metrics provided."""
+
+            else:
+                system_prompt = """You are a business data analyst with direct access to comprehensive business intelligence including revenue analysis, customer data, financial performance, and operational metrics.
+
+CRITICAL: You have specific business data with exact figures, percentages, trends, and insights. Use these numbers directly in your response. Do NOT say you lack data - you have detailed business analysis available.
+
+Analyze the provided business intelligence thoroughly and provide clear, specific insights. Reference actual data points, calculated metrics, and explain what the numbers mean for business strategy."""
         else:
-            system_prompt = """You are a helpful business data assistant. Provide clear, accurate answers based on the provided data. Be specific and reference the actual data points when possible."""
+            if synthesis_type == "analytical":
+                system_prompt = """You are a senior business analyst. Analyze the provided data and give a comprehensive, analytical response. Include specific numbers, trends, and insights. Focus on what the data reveals about business performance."""
+            elif synthesis_type == "strategic":
+                system_prompt = """You are a strategic business consultant. Provide strategic insights and actionable recommendations based on the data. Focus on implications and next steps for business growth."""
+            else:
+                system_prompt = """You are a helpful business data assistant. Provide clear, accurate answers based on the provided data. Be specific and reference the actual data points when possible."""
         
-        user_prompt = f"""Based on the following data, please answer this question: {query}
+        # Enhanced user prompt for CSV data
+        if csv_data_found:
+            user_prompt = f"""Question: {query}
+
+🎯 BUSINESS INTELLIGENCE DATA AVAILABLE:
+{context_text}
+
+📋 ANALYSIS REQUIREMENTS:
+You have comprehensive business intelligence data with specific metrics, revenue figures, customer analytics, and operational insights. Use these exact numbers and insights to answer the question.
+
+✅ YOUR TASK:
+1. Reference the specific business metrics provided (revenue amounts, percentages, customer counts, etc.)
+2. Use the calculated insights and trends from the business intelligence analysis
+3. Base recommendations on the actual data patterns shown
+4. Provide specific, actionable next steps using the metrics available
+5. Create a data-driven strategic plan using the business intelligence provided
+
+🚫 DO NOT:
+- Say you don't have access to data (you have comprehensive business intelligence)
+- Use generic recommendations (use the specific metrics provided)
+- Ignore the detailed business insights available
+
+Provide a comprehensive, data-driven response using the business intelligence data:"""
+        else:
+            user_prompt = f"""Based on the following data, please answer this question: {query}
 
 Available Data:
 {context_text}
@@ -281,6 +379,38 @@ Recommendations:"""
         Analyze retrieved data to create summary statistics.
         """
         try:
+            # Debug: Log what data the synthesizer receives
+            logger.info(f"🔬 Synthesizer analyzing {len(retrieved_data)} items")
+            
+            csv_count = 0
+            for i, item in enumerate(retrieved_data[:5]):  # Log first 5 items
+                item_type = item.get("type", "unknown")
+                content_len = len(item.get("content", ""))
+                insights_count = len(item.get("data_insights", []))
+                
+                logger.info(f"  Item {i+1}: type={item_type}, content_len={content_len}, insights={insights_count}")
+                
+                if item_type == "csv_data":
+                    csv_count += 1
+                    if insights_count > 0:
+                        logger.info(f"    CSV insights sample: {item['data_insights'][:2]}")
+            
+            # ALSO check the last few items where CSV data should be!
+            logger.info(f"  LAST 3 items in synthesizer:")
+            for i, item in enumerate(retrieved_data[-3:]):
+                item_type = item.get("type", "unknown")
+                content_len = len(item.get("content", ""))
+                insights_count = len(item.get("data_insights", []))
+                
+                logger.info(f"    Item {len(retrieved_data)-2+i}: type={item_type}, content_len={content_len}, insights={insights_count}")
+                
+                if item_type == "csv_data":
+                    csv_count += 1
+                    if insights_count > 0:
+                        logger.info(f"      CSV insights sample: {item['data_insights'][:2]}")
+            
+            logger.info(f"CSV data found={csv_count > 0}, total insights={sum(len(item.get('data_insights', [])) for item in retrieved_data)}")
+            
             summary = {
                 "total_items": len(retrieved_data),
                 "data_types": {},

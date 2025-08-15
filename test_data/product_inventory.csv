@@ -1,0 +1,41 @@
+Product_ID,Product_Name,Category,Brand,Price,Cost,Stock_Quantity,Supplier,SKU,Launch_Date,Rating,Reviews_Count,Warehouse_Location
+PROD_001,Laptop Pro X1,Electronics,TechCorp,1299.99,899.99,45,Supplier_A,TC-LP-001,2023-03-15,4.5,127,Warehouse_North
+PROD_002,Wireless Headphones,Electronics,AudioMax,199.99,129.99,89,Supplier_B,AM-WH-002,2023-01-20,4.3,203,Warehouse_South
+PROD_003,Office Chair Deluxe,Furniture,ComfortPlus,599.99,399.99,23,Supplier_C,CP-OC-003,2022-11-10,4.7,89,Warehouse_East
+PROD_004,Gaming Monitor 27",Electronics,DisplayTech,449.99,299.99,67,Supplier_A,DT-GM-004,2023-05-08,4.4,156,Warehouse_West
+PROD_005,Standing Desk,Furniture,ErgoWorks,799.99,549.99,34,Supplier_C,EW-SD-005,2023-02-12,4.6,78,Warehouse_North
+PROD_006,Smartphone Z5,Electronics,MobileTech,899.99,649.99,78,Supplier_D,MT-SZ-006,2023-07-22,4.2,234,Warehouse_South
+PROD_007,Coffee Machine Pro,Appliances,BrewMaster,299.99,189.99,56,Supplier_E,BM-CM-007,2023-04-18,4.1,92,Warehouse_East
+PROD_008,Wireless Mouse,Electronics,TechCorp,79.99,49.99,156,Supplier_A,TC-WM-008,2022-12-05,4.0,345,Warehouse_West
+PROD_009,Ergonomic Keyboard,Electronics,TypeMax,149.99,89.99,89,Supplier_B,TM-EK-009,2023-06-30,4.3,167,Warehouse_North
+PROD_010,Air Purifier,Appliances,CleanAir,399.99,259.99,43,Supplier_E,CA-AP-010,2023-08-14,4.5,134,Warehouse_South
+PROD_011,Gaming Chair,Furniture,ComfortPlus,699.99,459.99,29,Supplier_C,CP-GC-011,2023-01-25,4.4,112,Warehouse_East
+PROD_012,Tablet X10,Electronics,MobileTech,649.99,449.99,67,Supplier_D,MT-TX-012,2023-09-10,4.2,189,Warehouse_West
+PROD_013,Smart Watch,Electronics,WearTech,349.99,229.99,94,Supplier_F,WT-SW-013,2023-03-28,4.1,276,Warehouse_North
+PROD_014,Desk Lamp LED,Furniture,LightWorks,89.99,54.99,123,Supplier_G,LW-DL-014,2022-10-15,3.9,198,Warehouse_South
+PROD_015,Wireless Charger,Electronics,ChargeTech,49.99,29.99,234,Supplier_A,CT-WC-015,2023-05-20,4.0,456,Warehouse_East
+PROD_016,Vacuum Cleaner,Appliances,CleanMax,249.99,159.99,38,Supplier_E,CM-VC-016,2023-07-05,4.3,87,Warehouse_West
+PROD_017,Monitor Stand,Furniture,ErgoWorks,129.99,79.99,78,Supplier_C,EW-MS-017,2023-02-28,4.2,145,Warehouse_North
+PROD_018,Bluetooth Speaker,Electronics,AudioMax,179.99,119.99,67,Supplier_B,AM-BS-018,2023-11-12,4.4,123,Warehouse_South
+PROD_019,Coffee Grinder,Appliances,BrewMaster,159.99,99.99,45,Supplier_E,BM-CG-019,2023-04-03,4.0,67,Warehouse_East
+PROD_020,Air Fryer,Appliances,CookSmart,199.99,129.99,56,Supplier_H,CS-AF-020,2023-08-28,4.5,98,Warehouse_West
+PROD_021,Webcam HD,Electronics,StreamTech,119.99,79.99,89,Supplier_F,ST-WH-021,2023-06-15,3.8,234,Warehouse_North
+PROD_022,Desk Organizer,Furniture,OfficeMax,39.99,24.99,167,Supplier_G,OM-DO-022,2022-12-18,3.7,312,Warehouse_South
+PROD_023,Smart Thermostat,Electronics,HomeTech,249.99,169.99,34,Supplier_F,HT-ST-023,2023-09-25,4.6,89,Warehouse_East
+PROD_024,Microwave Oven,Appliances,CookSmart,179.99,119.99,67,Supplier_H,CS-MO-024,2023-01-12,4.1,156,Warehouse_West
+PROD_025,Blender Pro,Appliances,BlendMax,129.99,84.99,78,Supplier_E,BM-BP-025,2023-10-08,4.2,134,Warehouse_North
+PROD_026,Monitor Arm,Furniture,ErgoWorks,199.99,129.99,45,Supplier_C,EW-MA-026,2023-03-20,4.3,78,Warehouse_South
+PROD_027,Security Camera,Electronics,SafeTech,299.99,199.99,56,Supplier_F,ST-SC-027,2023-07-15,4.0,92,Warehouse_East
+PROD_028,Robot Vacuum,Appliances,CleanMax,449.99,299.99,23,Supplier_E,CM-RV-028,2023-11-30,4.7,67,Warehouse_West
+PROD_029,Portable SSD,Electronics,DataTech,189.99,124.99,89,Supplier_A,DT-PS-029,2023-05-12,4.4,178,Warehouse_North
+PROD_030,Electric Kettle,Appliances,BrewMaster,89.99,59.99,134,Supplier_E,BM-EK-030,2023-02-22,4.1,223,Warehouse_South
+PROD_031,Wireless Doorbell,Electronics,HomeTech,79.99,49.99,156,Supplier_F,HT-WD-031,2023-08-05,3.9,145,Warehouse_East
+PROD_032,Adjustable Footrest,Furniture,ComfortPlus,129.99,84.99,67,Supplier_C,CP-AF-032,2023-04-18,4.0,89,Warehouse_West
+PROD_033,Smart Light Bulb,Electronics,LightWorks,24.99,14.99,289,Supplier_G,LW-SL-033,2023-09-08,4.2,456,Warehouse_North
+PROD_034,Food Processor,Appliances,CookSmart,229.99,149.99,34,Supplier_H,CS-FP-034,2023-06-25,4.3,78,Warehouse_South
+PROD_035,USB Hub,Electronics,TechCorp,39.99,24.99,178,Supplier_A,TC-UH-035,2023-01-30,3.8,267,Warehouse_East
+PROD_036,Bookshelf,Furniture,OfficeMax,199.99,129.99,45,Supplier_G,OM-BS-036,2022-11-22,4.1,134,Warehouse_West
+PROD_037,Fitness Tracker,Electronics,WearTech,199.99,129.99,78,Supplier_F,WT-FT-037,2023-10-15,4.0,189,Warehouse_North
+PROD_038,Humidifier,Appliances,CleanAir,149.99,99.99,89,Supplier_E,CA-HU-038,2023-03-05,4.2,145,Warehouse_South
+PROD_039,Laptop Stand,Furniture,ErgoWorks,89.99,59.99,123,Supplier_C,EW-LS-039,2023-07-28,4.1,167,Warehouse_East
+PROD_040,Wireless Earbuds,Electronics,AudioMax,149.99,99.99,156,Supplier_B,AM-WE-040,2023-12-10,4.4,234,Warehouse_West
