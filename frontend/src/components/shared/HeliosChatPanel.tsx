@@ -33,7 +33,21 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
       type: "agent",
       content: goalId 
         ? "Hello! I'm Helios, your autonomous TPM agent. I can help you analyze the data you've uploaded for this goal and answer questions about it. What would you like to know?"
-        : "Hello! I'm Helios, your autonomous TPM agent. To get started, please open a specific goal so I can help you analyze its data.",
+        : `Hello! I'm Helios, your autonomous TPM agent. I can help you with trade promotion management tasks.
+
+Here's what I can do:
+• Analyze your uploaded data and generate insights
+• Answer questions about your goals and promotions
+• Help with strategy recommendations
+• Provide performance summaries
+
+Try asking me:
+"What goals do I have?"
+"Show me my latest data uploads"
+"Which promotion is performing best?"
+"What insights do you have for me?"
+
+What would you like to explore today?`,
       timestamp: new Date(),
     }
   ]);
@@ -49,8 +63,81 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
     scrollToBottom();
   }, [messages]);
 
+  const handleGeneralQuery = async (query: string) => {
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    
+    const lowerQuery = query.toLowerCase();
+    let response = "";
+
+    if (lowerQuery.includes("goals") || lowerQuery.includes("goal")) {
+      response = `I can help you with your goals! To analyze specific goal data, you'll need to navigate to a particular goal from your goals page. 
+
+In the meantime, I can help with:
+• General TPM strategy questions
+• Best practices for trade promotions
+• Data analysis techniques
+• Goal setting recommendations
+
+Try asking: "What makes a successful trade promotion?" or "How should I structure my promotional goals?"`;
+    } else if (lowerQuery.includes("data") || lowerQuery.includes("upload")) {
+      response = `To analyze your uploaded data, please navigate to a specific goal where your data is stored. Each goal contains its own data uploads and insights.
+
+I can still help you with:
+• Data preparation best practices
+• Understanding TPM metrics
+• Promotion planning strategies
+
+What would you like to learn about?`;
+    } else if (lowerQuery.includes("help") || lowerQuery.includes("what can you do")) {
+      response = `I'm your autonomous TPM agent! Here's how I can assist you:
+
+**With a specific goal selected:**
+• Analyze uploaded promotional data
+• Generate AI-powered insights
+• Answer questions about goal performance
+• Provide strategy recommendations
+
+**General assistance:**
+• TPM best practices and strategies
+• Promotion planning guidance
+• Data analysis methodologies
+• Goal optimization tips
+
+To unlock my full analytical capabilities, navigate to a specific goal and I'll help you dive deep into your promotional data!`;
+    } else if (lowerQuery.includes("promotion") || lowerQuery.includes("strategy")) {
+      response = `Great question about promotional strategies! Here are some key principles for successful trade promotions:
+
+• **Clear Objectives**: Define specific, measurable goals
+• **Data-Driven Decisions**: Use historical performance data
+• **Channel Optimization**: Align promotions with channel strengths
+• **Timing Strategy**: Consider seasonality and market conditions
+• **ROI Focus**: Monitor return on promotional investment
+
+For specific analysis of your promotional data, navigate to a goal and I can provide detailed insights based on your actual performance metrics!`;
+    } else {
+      response = `I'd be happy to help! While I can provide general TPM guidance right now, my full analytical power is unlocked when you navigate to a specific goal.
+
+For immediate assistance, try asking about:
+• "What makes a good promotional strategy?"
+• "How do I measure promotion success?"
+• "What data should I track for TPM?"
+
+Or navigate to a specific goal where I can analyze your actual data and provide personalized insights!`;
+    }
+
+    const agentMessage: Message = {
+      id: (Date.now() + 1).toString(),
+      type: "agent",
+      content: response,
+      timestamp: new Date(),
+    };
+
+    setMessages(prev => [...prev, agentMessage]);
+  };
+
   const handleSendMessage = async () => {
-    if (!inputValue.trim() || !goalId) return;
+    if (!inputValue.trim()) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -65,7 +152,13 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
     setIsTyping(true);
 
     try {
-      // Get auth token
+      // Handle common queries without requiring a goal
+      if (!goalId) {
+        await handleGeneralQuery(currentQuery);
+        return;
+      }
+
+      // Get auth token for goal-specific queries
       const token = localStorage.getItem('token');
       if (!token) {
         throw new Error('No authentication token found');
@@ -185,7 +278,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
                 <Bot className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-[#111827]">Helios Agent</h2>
+                <h2 className="text-lg font-semibold text-[#111827]">Helios AgentSpace</h2>
                 <div className="flex items-center space-x-2">
                   <div className="w-2 h-2 bg-[#0F1F3D] rounded-full" />
                   <span className="text-sm text-[#4B5563]">Online & Ready</span>
@@ -298,8 +391,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
             <Input
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder={goalId ? "Ask about your data..." : "Select a goal first"}
-              disabled={!goalId}
+              placeholder={goalId ? "Ask about your data..." : "Ask me anything about TPM..."}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
@@ -310,12 +402,11 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
                 flex-1 bg-white border border-[#E5E7EB] text-[#111827] text-base
                 placeholder:text-[#4B5563] rounded-lg px-4 py-3 min-h-[48px]
                 focus:ring-2 focus:ring-[#0F1F3D] focus:border-[#0F1F3D] focus:outline-none
-                disabled:bg-[#F7F8FA] disabled:text-[#4B5563]
               "
             />
             <Button
               onClick={handleSendMessage}
-              disabled={!inputValue.trim() || isTyping || !goalId}
+              disabled={!inputValue.trim() || isTyping}
               className="
                 bg-[#0F1F3D] text-white hover:bg-[#152C57] 
                 disabled:bg-[#E5E7EB] disabled:text-[#4B5563]
@@ -330,7 +421,7 @@ export function HeliosChatPanel({ isOpen, onClose, goalId }: HeliosChatPanelProp
           <p className="text-sm text-[#4B5563] mt-4 text-center leading-relaxed">
             {goalId 
               ? "Ask questions about your uploaded data and promotional strategies"
-              : "Select a goal to start chatting with Helios"
+              : "Ask me about TPM strategies, best practices, or navigate to a goal for data analysis"
             }
           </p>
         </div>
