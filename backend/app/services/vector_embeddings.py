@@ -197,7 +197,8 @@ class VectorEmbeddingService:
             return []
         
         # Extract embeddings and create FAISS index
-        embeddings = np.array([chunk["embedding"] for chunk in goal_chunks])
+        embeddings = np.array([chunk["embedding"] for chunk in goal_chunks], dtype=np.float32)
+        query_embedding = np.array(query_embedding, dtype=np.float32)
         
         # Create FAISS index
         index = faiss.IndexFlatIP(self.dimension)  # Inner product for cosine similarity
