@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Helios AI Agent">
+  <title>Helios AI Agent</title>
+  <defs>
+    <!-- Theme -->
+    <style>
+      .brand { stroke:#0F1F3D; }
+      .brand-fill { fill:#0F1F3D; }
+      .accent { stroke:#F59E0B; }
+    </style>
+  </defs>
+  <!-- Chat bubble container -->
+  <rect x="10" y="12" width="44" height="32" rx="8"
+        fill="none" class="brand" stroke-width="2.5"/>
+  <!-- Tail -->
+  <path d="M28 44 L32 52 L36 44" fill="none" class="brand" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Sun (Helios) = core + minimal rays -->
+  <circle cx="32" cy="28" r="8" fill="none" class="brand" stroke-width="2.5"/>
+  <g stroke-linecap="round" stroke-width="2.5">
+    <!-- brand rays -->
+    <path class="brand" d="M32 14v4"/>
+    <path class="brand" d="M32 38v4"/>
+    <path class="brand" d="M18 28h4"/>
+    <path class="brand" d="M42 28h4"/>
+    <!-- accent rays (sparingly, for a premium hint of AI/insight) -->
+    <path class="accent" d="M22.5 18.5l2.8 2.1"/>
+    <path class="accent" d="M41.5 18.5l-2.8 2.1"/>
+    <path class="accent" d="M22.5 37.5l2.8-2.1"/>
+    <path class="accent" d="M41.5 37.5l-2.8-2.1"/>
+  </g>
+  <!-- Subtle dot to imply "agentic/online" -->
+  <circle cx="45.5" cy="16.5" r="2" class="brand-fill"/>
+</svg>

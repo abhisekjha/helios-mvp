@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { X, Send, Bot, User, Maximize2, Minimize2, GripVertical } from "lucide-react";
+import { X, Send, User, Maximize2, Minimize2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DataVisualizationPanel, parseInsightsFromText, InsightData } from '@/components/insights/DataVisualizationPanel';
 import { EnhancedAgentResponse } from '@/components/chat/EnhancedAgentResponse';
+import { HeliosLogo } from '@/components/ui/helios-logo';
 
 interface Message {
   id: string;
@@ -525,8 +526,8 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
         <div className="p-6 border-b border-[#E5E7EB] bg-gradient-to-r from-slate-50 to-blue-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="w-12 h-12 bg-gradient-to-br from-[#0F1F3D] to-[#1e3a8a] rounded-xl flex items-center justify-center shadow-lg">
-                <Bot className="w-6 h-6 text-white" />
+              <div className="w-12 h-12 rounded-xl flex items-center justify-center shadow-lg">
+                <HeliosLogo size="xl" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-[#111827] flex items-center space-x-2">
@@ -587,12 +588,12 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                 <div className={`flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center ${
                   message.type === "user" 
                     ? "bg-[#F7F8FA] ml-3" 
-                    : "bg-[#0F1F3D] mr-3"
+                    : "mr-3"
                 }`}>
                   {message.type === "user" ? (
                     <User className="w-5 h-5 text-[#4B5563]" />
                   ) : (
-                    <Bot className="w-5 h-5 text-white" />
+                    <HeliosLogo size="md" />
                   )}
                 </div>
                 <div className="flex flex-col space-y-2">
@@ -771,8 +772,8 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
           {isTyping && (
             <div className="flex justify-start">
               <div className="flex max-w-[85%]">
-                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-[#0F1F3D] flex items-center justify-center mr-3">
-                  <Bot className="w-5 h-5 text-white" />
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
+                  <HeliosLogo size="md" />
                 </div>
                 <div className="bg-[#F7F8FA] p-4 rounded-xl">
                   <div className="flex space-x-1">

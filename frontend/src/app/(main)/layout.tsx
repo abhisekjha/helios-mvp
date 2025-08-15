@@ -5,12 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { UserNav } from "@/components/layout/user-nav";
 import { HeliosChatPanel } from "@/components/shared/HeliosChatPanel";
+import { HeliosLogo } from "@/components/ui/helios-logo";
 import { 
   Command, 
   Target, 
   Shield, 
-  MessageSquare,
-  Bot 
+  MessageSquare
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -57,8 +57,8 @@ export default function MainLayout({
         {/* Logo */}
         <div className="p-6 border-b border-border">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-              <Bot className="w-6 h-6 text-primary-foreground" />
+            <div className="w-10 h-10 flex items-center justify-center">
+              <HeliosLogo size="lg" />
             </div>
             <div>
               <h1 className="text-xl font-semibold text-foreground">Helios</h1>
