@@ -31,7 +31,7 @@ class SynthesizedResponse(BaseModel):
     """Synthesized response with metadata"""
     answer: str
     confidence: float
-    sources_used: List[str]
+    sources_used: List[Dict[str, Any]]  # Changed from List[str] to List[Dict[str, Any]]
     key_insights: List[str]
     data_summary: Dict[str, Any]
     recommendations: Optional[List[str]] = None
@@ -473,29 +473,65 @@ Recommendations:"""
             logger.error(f"Confidence calculation failed: {e}")
             return 0.5  # Default moderate confidence
     
-    def _identify_sources(self, retrieved_data: List[Dict[str, Any]]) -> List[str]:
+    def _identify_sources(self, retrieved_data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Identify and list data sources used in the response.
+        Identify and list detailed data sources used in the response.
+        Returns source objects with metadata for enhanced UI display.
         """
-        sources = set()
+        sources = []
+        seen_sources = set()
         
         for item in retrieved_data:
-            source = item.get("source", "")
-            if source:
-                sources.add(source)
+            # Create detailed source object
+            source_info = {
+                "text": item.get("content", "")[:300] + "..." if len(item.get("content", "")) > 300 else item.get("content", ""),
+                "type": item.get("type", "unknown"),
+                "similarity_score": item.get("similarity_score", 0.0)
+            }
             
-            # Also check metadata for source information
+            # Add metadata if available
             metadata = item.get("metadata", {})
             if isinstance(metadata, dict):
-                metadata_source = metadata.get("source", "")
-                if metadata_source:
-                    sources.add(metadata_source)
+                source_info["metadata"] = {
+                    "file_name": metadata.get("file_name", ""),
+                    "source": metadata.get("source", ""),
+                    "rows": metadata.get("rows", 0),
+                    "columns": metadata.get("columns", [])
+                }
+                
+                # Use file name as unique identifier
+                file_name = metadata.get("file_name", "")
+                if file_name and file_name not in seen_sources:
+                    seen_sources.add(file_name)
+                    sources.append(source_info)
+                elif not file_name:
+                    # For non-file sources, use content hash as identifier
+                    content_hash = hash(item.get("content", "")[:100])
+                    if content_hash not in seen_sources:
+                        seen_sources.add(content_hash)
+                        sources.append(source_info)
+            else:
+                # Fallback for items without proper metadata
+                content_hash = hash(item.get("content", "")[:100])
+                if content_hash not in seen_sources:
+                    seen_sources.add(content_hash)
+                    sources.append(source_info)
         
-        # If no specific sources found, provide generic description
+        # If no specific sources found, provide generic information
         if not sources:
-            sources.add("Uploaded CSV data")
+            sources.append({
+                "text": "Analysis based on uploaded CSV data files",
+                "type": "csv_data", 
+                "similarity_score": 1.0,
+                "metadata": {
+                    "file_name": "Multiple CSV files",
+                    "source": "Uploaded data",
+                    "rows": 0,
+                    "columns": []
+                }
+            })
         
-        return list(sources)
+        return sources
     
     async def _handle_no_data_response(self, query: str, context: Dict[str, Any]) -> SynthesizedResponse:
         """

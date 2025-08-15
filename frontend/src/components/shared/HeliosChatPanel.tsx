@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DataVisualizationPanel, parseInsightsFromText, InsightData } from '@/components/insights/DataVisualizationPanel';
+import { EnhancedAgentResponse } from '@/components/chat/EnhancedAgentResponse';
 
 interface Message {
   id: string;
@@ -19,6 +20,12 @@ interface Message {
     text: string;
     type: string;
     similarity_score: number;
+    metadata?: {
+      file_name?: string;
+      source?: string;
+      rows?: number;
+      columns?: string[];
+    };
   }>;
   agentActivity?: {
     currentAgent: string;
@@ -28,6 +35,26 @@ interface Message {
     confidence?: number;
     isComplete: boolean;
   };
+  // Enhanced response data
+  keyMetrics?: Array<{
+    id: string;
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    trend?: 'up' | 'down' | 'neutral';
+    clickable?: boolean;
+    color?: 'green' | 'red' | 'blue' | 'yellow';
+  }>;
+  recommendations?: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+    action?: string;
+    supportingData?: string;
+  }>;
+  executiveSummary?: string;
+  useEnhancedLayout?: boolean;
 }
 
 interface HeliosChatPanelProps {
@@ -379,19 +406,28 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                   isComplete: true
                 };
                 
-                // Parse insights from the final content
+                // Parse insights and enhanced data from the final content
                 const insights = parseInsightsFromText(agentContent);
+                const enhancedData = parseEnhancedResponseData(agentContent);
                 
                 setMessages(prev => prev.map(msg => 
                   msg.id === agentMessageId 
-                    ? { ...msg, content: agentContent, sources, agentActivity, insights }
+                    ? { 
+                        ...msg, 
+                        content: agentContent, 
+                        sources, 
+                        agentActivity, 
+                        insights,
+                        ...enhancedData,
+                        useEnhancedLayout: enhancedData.keyMetrics.length > 0 || enhancedData.recommendations.length > 0
+                      }
                     : msg
                 ));
                 break;
               } else if (data.type === 'error') {
                 throw new Error(data.error);
               }
-            } catch (parseError) {
+            } catch (e) {
               // Handle non-JSON data (legacy format)
               const rawData = line.slice(6);
               if (rawData && rawData !== '[DONE]') {
@@ -418,12 +454,21 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
         }
       }
 
-      // Final processing: parse insights from complete content
+      // Final processing: parse insights and enhanced data from complete content
       if (agentContent.trim()) {
         const insights = parseInsightsFromText(agentContent);
+        
+        // Parse enhanced data for improved UI
+        const enhancedData = parseEnhancedResponseData(agentContent);
+        
         setMessages(prev => prev.map(msg => 
           msg.id === agentMessageId 
-            ? { ...msg, insights }
+            ? { 
+                ...msg, 
+                insights,
+                ...enhancedData,
+                useEnhancedLayout: enhancedData.keyMetrics.length > 0 || enhancedData.recommendations.length > 0
+              }
             : msg
         ));
       }
@@ -551,13 +596,29 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
                   )}
                 </div>
                 <div className="flex flex-col space-y-2">
-                  <div className={`p-4 rounded-xl ${
-                    message.type === "user"
-                      ? "bg-[#0F1F3D] text-white"
-                      : "bg-[#F7F8FA] text-[#111827]"
-                  }`}>
-                    <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
-                  </div>
+                  {/* Enhanced Response Layout for Agent Messages */}
+                  {message.type === "agent" && message.useEnhancedLayout && message.agentActivity?.isComplete ? (
+                    <EnhancedAgentResponse
+                      query={messages.find(m => m.type === "user" && parseInt(m.id) < parseInt(message.id))?.content || ""}
+                      mainAnswer={message.content}
+                      keyMetrics={message.keyMetrics}
+                      recommendations={message.recommendations}
+                      sources={message.sources}
+                      confidence={message.agentActivity?.confidence}
+                      queryType={message.agentActivity?.queryType}
+                      executiveSummary={message.executiveSummary}
+                    />
+                  ) : (
+                    <>
+                      <div className={`p-4 rounded-xl ${
+                        message.type === "user"
+                          ? "bg-[#0F1F3D] text-white"
+                          : "bg-[#F7F8FA] text-[#111827]"
+                      }`}>
+                        <p className="text-base leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                      </div>
+                    </>
+                  )}
                   
                   {/* Agent Activity Indicator - Show for agent messages with activity, whether complete or not */}
                   {message.type === "agent" && (message.agentActivity || message.content.includes('🧠') || message.content.includes('Query classified')) && (
@@ -770,4 +831,197 @@ Or navigate to a specific goal where I can analyze your actual data and provide 
       </div>
     </div>
   );
+}
+
+// Helper function to parse enhanced response data from AI response
+function parseEnhancedResponseData(content: string) {
+  const keyMetrics: Array<{
+    id: string;
+    title: string;
+    value: string | number;
+    subtitle?: string;
+    trend?: 'up' | 'down' | 'neutral';
+    clickable?: boolean;
+    color?: 'green' | 'red' | 'blue' | 'yellow';
+  }> = [];
+  
+  const recommendations: Array<{
+    id: string;
+    title: string;
+    description: string;
+    priority: 'high' | 'medium' | 'low';
+    action?: string;
+    supportingData?: string;
+  }> = [];
+
+  // Extract key metrics
+  const metricPatterns = [
+    { pattern: /(\d+(?:,\d{3})*)\s*(?:customers?|users?)/gi, title: "Customer Count", clickable: true },
+    { pattern: /(\d+(?:\.\d+)?)\s*%/gi, title: "Percentage Metric" },
+    { pattern: /\$(\d+(?:,\d{3})*(?:\.\d+)?)/gi, title: "Revenue/Cost" },
+    { pattern: /(\d+(?:,\d{3})*)\s*(?:sales?|orders?|items?)/gi, title: "Sales Volume" }
+  ];
+
+  metricPatterns.forEach((metricDef, index) => {
+    const matches = content.match(metricDef.pattern);
+    if (matches && matches.length > 0) {
+      matches.slice(0, 1).forEach((match, matchIndex) => {
+        const numbers = match.match(/\d+(?:[,.\d]*)/g);
+        if (numbers) {
+          const trend = determineTrendFromContext(match, content);
+          keyMetrics.push({
+            id: `metric-${index}-${matchIndex}`,
+            title: metricDef.title,
+            value: numbers[0],
+            subtitle: getMetricSubtitle(match, content),
+            trend,
+            clickable: metricDef.clickable || false,
+            color: trend === 'up' ? 'green' : trend === 'down' ? 'red' : 'blue'
+          });
+        }
+      });
+    }
+  });
+
+  // Extract recommendations
+  const recommendationSentences = extractRecommendations(content);
+  recommendationSentences.forEach((rec, index) => {
+    if (rec.trim().length > 30) {
+      const priority = index === 0 ? 'high' : index === 1 ? 'medium' : 'low';
+      recommendations.push({
+        id: `rec-${index}`,
+        title: extractRecommendationTitle(rec),
+        description: rec.trim(),
+        priority,
+        action: extractAction(rec),
+        supportingData: extractSupportingData(rec)
+      });
+    }
+  });
+
+  // Generate executive summary
+  const executiveSummary = generateExecutiveSummary(content, keyMetrics);
+
+  return {
+    keyMetrics,
+    recommendations,
+    executiveSummary
+  };
+}
+
+function determineTrendFromContext(match: string, fullContext: string): 'up' | 'down' | 'neutral' {
+  const upWords = ['increase', 'improve', 'grow', 'higher', 'better', 'more', 'rising'];
+  const downWords = ['decrease', 'decline', 'lower', 'worse', 'drop', 'less', 'falling'];
+  
+  const contextLower = fullContext.toLowerCase();
+  const matchLower = match.toLowerCase();
+  
+  // Look for trend words in the surrounding context (within 100 characters)
+  const matchIndex = contextLower.indexOf(matchLower);
+  const surroundingText = contextLower.substring(Math.max(0, matchIndex - 100), matchIndex + 100);
+  
+  if (upWords.some(word => surroundingText.includes(word))) return 'up';
+  if (downWords.some(word => surroundingText.includes(word))) return 'down';
+  return 'neutral';
+}
+
+function getMetricSubtitle(match: string, context: string): string {
+  if (match.toLowerCase().includes('customer')) return 'From customer analysis';
+  if (match.includes('%')) return 'Based on data analysis';
+  if (match.includes('$')) return 'Financial impact';
+  if (match.toLowerCase().includes('sales')) return 'Sales performance';
+  return 'From uploaded data';
+}
+
+function extractRecommendations(content: string): string[] {
+  const recommendations: string[] = [];
+  
+  // Split by numbered lists or bullet points
+  const patterns = [
+    /\d+\.\s+([^.]+\.)/g,
+    /•\s+([^.]+\.)/g,
+    /\n-\s+([^.]+\.)/g,
+    /(?:recommend|suggest|should|consider|implement)[^.]+\./gi
+  ];
+
+  patterns.forEach(pattern => {
+    const matches = content.match(pattern);
+    if (matches) {
+      matches.forEach(match => {
+        const cleanMatch = match.replace(/^\d+\.\s+|^•\s+|^\n-\s+/g, '').trim();
+        if (cleanMatch.length > 30) {
+          recommendations.push(cleanMatch);
+        }
+      });
+    }
+  });
+
+  return recommendations.slice(0, 6); // Limit to 6 recommendations
+}
+
+function extractRecommendationTitle(sentence: string): string {
+  const words = sentence.trim().split(' ');
+  let title = words.slice(0, 8).join(' ');
+  
+  // Remove common starting words
+  title = title.replace(/^(We recommend|I recommend|Consider|You should|Implementation of|To|The|A)/i, '');
+  title = title.replace(/\.$/, '');
+  
+  return title.trim() || 'Strategic Recommendation';
+}
+
+function extractAction(sentence: string): string | undefined {
+  const actionPatterns = [
+    /implement\s+([^.]+)/i,
+    /should\s+([^.]+)/i,
+    /need to\s+([^.]+)/i,
+    /consider\s+([^.]+)/i
+  ];
+  
+  for (const pattern of actionPatterns) {
+    const match = sentence.match(pattern);
+    if (match) {
+      return match[1].trim();
+    }
+  }
+  return undefined;
+}
+
+function extractSupportingData(sentence: string): string | undefined {
+  if (sentence.includes('.csv')) {
+    const csvMatch = sentence.match(/(\w+\.csv)/);
+    return csvMatch ? csvMatch[1] : undefined;
+  }
+  
+  if (sentence.includes('data') || sentence.includes('analysis')) {
+    return 'Based on uploaded data';
+  }
+  
+  return undefined;
+}
+
+function generateExecutiveSummary(content: string, keyMetrics: Array<{
+  id: string;
+  title: string;
+  value: string | number;
+  subtitle?: string;
+  trend?: 'up' | 'down' | 'neutral';
+  clickable?: boolean;
+  color?: 'green' | 'red' | 'blue' | 'yellow';
+}>): string | undefined {
+  if (keyMetrics.length === 0) return undefined;
+  
+  // Extract the first paragraph or key finding
+  const sentences = content.split(/[.!?]+/);
+  const firstMeaningfulSentence = sentences.find(s => 
+    s.trim().length > 50 && 
+    !s.toLowerCase().includes('based on') &&
+    !s.toLowerCase().includes('retrieved')
+  );
+  
+  if (firstMeaningfulSentence) {
+    return firstMeaningfulSentence.trim() + '.';
+  }
+  
+  return undefined;
 }
